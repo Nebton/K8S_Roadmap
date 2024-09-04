@@ -37,15 +37,27 @@ jobs:
         push: true
         tags: nebton544/k8s_roadmap:frontend-${{ github.sha }}
 
-    - name: Set up kubectl
+- name: Set up kubectl
       uses: azure/setup-kubectl@v1
       with:
-        version: 'v1.21.3'
+        version: 'v1.30.0'  # Update this to match your cluster version
+
+    - name: Start Minikube
+      uses: medyagh/setup-minikube@master
 
     - name: Deploy to Minikube
       run: |
-        minikube start
-        kubectl set image deployment/backend-deployment backend=nebton544/k8s_roadmap:backend-${{ github.sha }}
-        kubectl set image deployment/frontend-deployment frontend=nebton544/k8s_roadmap:frontend-${{ github.sha }}
+        cd Level-1/microservices-demo/
+        # Update deployment YAML files with new image tags
+        sed -i 's|nebton544/k8s_roadmap:backend-.*|nebton544/k8s_roadmap:backend-${{ github.sha }}|' kubernetes/backend-deployment.yaml
+        sed -i 's|nebton544/k8s_roadmap:frontend-.*|nebton544/k8s_roadmap:frontend-${{ github.sha }}|' kubernetes/frontend-deployment.yaml
+        
+        # Apply Kubernetes manifests
+        kubectl apply -f kubernetes/
+        
+        # Wait for deployments to be ready
         kubectl rollout status deployment/backend-deployment
         kubectl rollout status deployment/frontend-deployment
+        
+        # Display deployed services
+        kubectl get services
