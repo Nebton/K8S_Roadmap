@@ -62,3 +62,17 @@ jobs:
         # Display deployed services
         kubectl get services
 
+
+    - name: Install ngrok
+      run: |
+        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+        sudo apt update && sudo apt install ngrok
+
+    - name: Expose Frontend Service with ngrok
+      run: |
+        nohup ngrok http 30474 --log=stdout &
+
+    - name: Get ngrok URL
+      run: |
+        curl --silent --show-error http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'
