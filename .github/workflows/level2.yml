@@ -22,7 +22,7 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        docker build -t backend:${{ github.sha }} ./backend
+        docker build -t backend:${{ github.sha }} ./Level-1/microservices-demo/backend
         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         docker push backend:${{ github.sha }}
 
@@ -31,7 +31,7 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        docker build -t frontend:${{ github.sha }} ./frontend
+        docker build -t frontend:${{ github.sha }} ./Level-1/microservices-demo/frontend
         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         docker push frontend:${{ github.sha }}
 
