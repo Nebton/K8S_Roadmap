@@ -47,7 +47,6 @@ jobs:
 
     - name: Deploy to Minikube
       run: |
-        cd Level-1/microservices-demo/
         # Update deployment YAML files with new image tags
         sed -i 's|nebton544/k8s_roadmap:backend-.*|nebton544/k8s_roadmap:backend-${{ github.sha }}|' kubernetes/backend-deployment.yaml
         sed -i 's|nebton544/k8s_roadmap:frontend-.*|nebton544/k8s_roadmap:frontend-${{ github.sha }}|' kubernetes/frontend-deployment.yaml
