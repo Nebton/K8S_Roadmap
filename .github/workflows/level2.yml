@@ -61,3 +61,6 @@ jobs:
         
         # Display deployed services
         kubectl get services
+
+        # Get IP
+        minikube ip
