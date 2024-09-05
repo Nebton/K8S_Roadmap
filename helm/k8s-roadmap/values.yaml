@@ -1,0 +1,15 @@
+backend:
+  image:
+    repository: nebton544/k8s_roadmap
+    tag: backend-latest
+  replicaCount: 1
+  port: 5000
+
+frontend:
+  image:
+    repository: nebton544/k8s_roadmap
+    tag: frontend-latest
+  replicaCount: 1
+  port: 5050
+  service:
+    type: NodePort
