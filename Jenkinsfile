@@ -27,7 +27,8 @@ pipeline {
         
         stage('Deploy') {
             steps {
-                    sh "helm upgrade --install k8s-roadmap ./charts/k8s-roadmap --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
+                    sh "helm upgrade --install k8s-roadmap ./helm/charts/k8s-roadmap --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
+                } 
             }
         }
     }
