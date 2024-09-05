@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_BACKEND = "nebton544/k8s_roadmap"
         DOCKER_IMAGE_FRONTEND = "nebton544/k8s_roadmap"
+        KUBECONFIG = '~/.kube/config'
     }
     
     stages {
