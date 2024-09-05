@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_BACKEND = "nebton544/k8s_roadmap"
         DOCKER_IMAGE_FRONTEND = "nebton544/k8s_roadmap"
-        KUBECONFIG = '/home/doom/.kube/config'
+        KUBECONFIG = "${env.WORKSPACE}/kubeconfig"
     }
     
     stages {
@@ -27,7 +27,9 @@ pipeline {
         
         stage('Deploy') {
             steps {
-                sh "helm upgrade --install k8s-roadmap ./charts/k8s-roadmap --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh "helm upgrade --install k8s-roadmap ./charts/k8s-roadmap --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
+                } 
             }
         }
     }
