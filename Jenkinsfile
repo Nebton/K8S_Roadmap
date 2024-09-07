@@ -13,13 +13,11 @@ pipeline {
             steps {
                 script {
 
-                    def branchName = env.BRANCH_NAME ?: env.GIT_BRANCH ?: sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-
-                    if (branchName == 'master') {
+                    if (env.GIT_BRANCH == 'master') {
                         env.DEPLOY_ENV = 'prod'
-                    } else if (branchName == 'staging') {
+                    } else if (env.GIT_BRANCH == 'staging') {
                         env.DEPLOY_ENV = 'staging'
-                    } else if (branchName == 'dev'){
+                    } else if (env.GIT_BRANCH == 'dev'){
                         env.DEPLOY_ENV = 'dev'
                     }
                 }
@@ -30,7 +28,7 @@ pipeline {
         stage('Debug') {
             steps {
                 script {
-                    echo "Branch Name: ${branchName}"
+                    echo "Branch Name: ${env.GIT_BRANCH}"
                     echo "Deploy Environment: ${env.DEPLOY_ENV}"
                 }
             }
