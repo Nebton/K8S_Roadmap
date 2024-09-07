@@ -5,34 +5,38 @@ pipeline {
         DOCKER_IMAGE_BACKEND = "nebton544/k8s_roadmap"
         DOCKER_IMAGE_FRONTEND = "nebton544/k8s_roadmap"
         KUBECONFIG = "/var/jenkins_home/config"
-        DEPLOY_ENV = ""
     }
     
     stages {
 
+        stage('Determine Environment') {
+            steps {
+                script {
+
+                    def branchName = env.BRANCH_NAME ?: env.GIT_BRANCH ?: sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+
+                    if (branchname == 'master') {
+                        env.DEPLOY_ENV = 'prod'
+                    } else if (branchname == 'staging') {
+                        env.DEPLOY_ENV = 'staging'
+                    } else if (branchname == 'dev'){
+                        env.DEPLOY_ENV = 'dev'
+                    }
+                }
+            }
+        }
+
+
         stage('Debug') {
             steps {
                 script {
-                    echo "Branch Name: ${env.BRANCH_NAME}"
+                    echo "Branch Name: ${branchname}"
                     echo "Deploy Environment: ${env.DEPLOY_ENV}"
                 }
             }
         }
 
 
-        stage('Determine Environment') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == 'master') {
-                        env.DEPLOY_ENV = 'prod'
-                    } else if (env.BRANCH_NAME == 'staging') {
-                        env.DEPLOY_ENV = 'staging'
-                    } else if (env.BRANCH_NAME == 'dev'){
-                        env.DEPLOY_ENV = 'dev'
-                    }
-                }
-            }
-        }
         stage('Build') {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT ./backend'
