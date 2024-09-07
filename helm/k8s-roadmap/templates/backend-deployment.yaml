@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: backend-deployment
 spec:
-  replicas: {{ .Values.backend.replicaCount }}
+  replicas: {{ index .Values.environments .Values.global.environment "replicaCount" }} 
   selector:
     matchLabels:
       app: backend
@@ -17,3 +17,4 @@ spec:
         image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
         ports:
         - containerPort: {{ .Values.backend.port }}
+        resources: {{- toYaml (index .Values.environments .Values.global.environment "resources") | nindent 12 }}

@@ -1,3 +1,26 @@
+global:
+  environment: dev
+
+environments:
+  dev:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+  staging:
+    replicaCount: 2
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+  prod:
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
 backend:
   image:
     repository: nebton544/k8s_roadmap
@@ -9,7 +32,7 @@ frontend:
   image:
     repository: nebton544/k8s_roadmap
     tag: frontend-latest
-  replicaCount: 3
+  replicaCount: 1
   port: 5050
   service:
     type: NodePort

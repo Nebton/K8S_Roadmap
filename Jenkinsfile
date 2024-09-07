@@ -8,6 +8,19 @@ pipeline {
     }
     
     stages {
+        stage('Determine Environment') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'main') {
+                        env.DEPLOY_ENV = 'prod'
+                    } else if (env.BRANCH_NAME == 'staging') {
+                        env.DEPLOY_ENV = 'staging'
+                    } else if (env.BRANCH_NAME == 'dev'){
+                        env.DEPLOY_ENV = 'dev'
+                    }
+                }
+            }
+        }
         stage('Build') {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT ./backend'
@@ -27,7 +40,7 @@ pipeline {
         
         stage('Deploy') {
             steps {
-                    sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
+                    sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --namespace ${env.DEPLOY_ENV} --set global.environment=${env.DEPLOY_ENV} --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
                 } 
             }
         }
