@@ -1,0 +1,11 @@
+# staging-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: staging
+data:
+  DATABASE_URL: "mongodb://staging-mongodb.staging.svc.cluster.local:27017/myapp"
+  API_URL: "http://staging-api.example.com"
+  LOG_LEVEL: "info"
+

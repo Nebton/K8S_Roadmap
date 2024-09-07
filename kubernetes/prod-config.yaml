@@ -1,0 +1,10 @@
+# prod-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: prod
+data:
+  DATABASE_URL: "mongodb://prod-mongodb.prod.svc.cluster.local:27017/myapp"
+  API_URL: "http://api.example.com"
+  LOG_LEVEL: "warn"

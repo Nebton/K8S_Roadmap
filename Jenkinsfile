@@ -52,6 +52,14 @@ pipeline {
             }
         }
         
+        stage('Deploy ConfigMap') {
+            steps {
+                script {
+                    sh "kubectl apply -f kubernetes/${env.DEPLOY_ENV}-config.yaml"
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                     sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --namespace ${env.DEPLOY_ENV} --set global.environment=${env.DEPLOY_ENV} --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"

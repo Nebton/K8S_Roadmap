@@ -18,3 +18,6 @@ spec:
         ports:
         - containerPort: {{ .Values.backend.port }}
         resources: {{- toYaml (index .Values.environments .Values.global.environment "resources") | nindent 12 }}
+        envFrom: 
+          - configMapRef:
+              name: app-config

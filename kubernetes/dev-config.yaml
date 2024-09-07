@@ -1,0 +1,12 @@
+# dev-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: dev
+data:
+  DATABASE_URL: "mongodb://dev-mongodb.dev.svc.cluster.local:27017/myapp"
+  API_URL: "http://dev-api.example.com"
+  LOG_LEVEL: "debug"
+
+
