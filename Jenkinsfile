@@ -5,9 +5,21 @@ pipeline {
         DOCKER_IMAGE_BACKEND = "nebton544/k8s_roadmap"
         DOCKER_IMAGE_FRONTEND = "nebton544/k8s_roadmap"
         KUBECONFIG = "/var/jenkins_home/config"
+        DEPLOY_ENV = ""
     }
     
     stages {
+
+        stage('Debug') {
+            steps {
+                script {
+                    echo "Branch Name: ${env.BRANCH_NAME}"
+                    echo "Deploy Environment: ${env.DEPLOY_ENV}"
+                }
+            }
+        }
+
+
         stage('Determine Environment') {
             steps {
                 script {
