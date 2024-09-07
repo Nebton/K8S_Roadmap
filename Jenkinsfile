@@ -11,7 +11,7 @@ pipeline {
         stage('Determine Environment') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'main') {
+                    if (env.BRANCH_NAME == 'master') {
                         env.DEPLOY_ENV = 'prod'
                     } else if (env.BRANCH_NAME == 'staging') {
                         env.DEPLOY_ENV = 'staging'
