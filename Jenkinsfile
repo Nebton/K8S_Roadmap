@@ -13,11 +13,11 @@ pipeline {
             steps {
                 script {
 
-                    if (env.GIT_BRANCH == 'master') {
+                    if (env.GIT_BRANCH == 'origin/master') {
                         env.DEPLOY_ENV = 'prod'
-                    } else if (env.GIT_BRANCH == 'staging') {
+                    } else if (env.GIT_BRANCH == 'origin/staging') {
                         env.DEPLOY_ENV = 'staging'
-                    } else if (env.GIT_BRANCH == 'dev'){
+                    } else if (env.GIT_BRANCH == 'origin/dev'){
                         env.DEPLOY_ENV = 'dev'
                     }
                 }
