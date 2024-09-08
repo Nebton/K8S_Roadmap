@@ -35,6 +35,7 @@ backend:
     tag: backend-latest
   replicaCount: 1
   port: 5000
+  portname: http
 
 frontend:
   image:

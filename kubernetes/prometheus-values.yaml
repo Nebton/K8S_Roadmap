@@ -1,7 +1,9 @@
 prometheus:
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
-    serviceMonitorSelector: {}
+    serviceMonitorSelector: 
+      matchLabels:
+        release : prometheus
     serviceMonitorNamespaceSelector: {}
     ruleSelector: {}
     ruleNamespaceSelector: {}
