@@ -1,0 +1,17 @@
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    ruleSelector: {}
+    ruleNamespaceSelector: {}
+    
+alertmanager:
+  enabled: true
+
+grafana:
+  enabled: true
+  adminPassword: prom-operator
+
+prometheusOperator:
+  createCustomResource: true
