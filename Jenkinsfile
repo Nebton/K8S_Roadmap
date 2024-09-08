@@ -67,6 +67,8 @@ pipeline {
             }
         stage('Monitor') {
             steps {
+                sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
+                sh "helm repo update"
                 sh "helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f kubernetes/prometheus-values.yaml -n prod"
                 sh "kubectl apply -f kubernetes/servicemonitor.yaml -n prod"
                 }
