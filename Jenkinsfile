@@ -65,5 +65,11 @@ pipeline {
                     sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --namespace ${env.DEPLOY_ENV} --set global.environment=${env.DEPLOY_ENV} --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
                 } 
             }
+        stage('Monitor') {
+            steps {
+                sh "helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f kubernetes/prometheus-values.yaml -n prod"
+                sh "kubectl apply -f kubernetes/servicemonitor.yaml -n prod"
+                }
+            }
         }
     }
