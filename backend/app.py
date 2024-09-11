@@ -4,6 +4,7 @@ from prometheus_client import Counter, Histogram, generate_latest, REGISTRY
 from prometheus_client.exposition import CONTENT_TYPE_LATEST
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from prometheus_client import make_wsgi_app
+from prometheus_client import Counter
 # Fetch environment variables
 database_url = os.getenv('DATABASE_URL')
 api_url = os.getenv('API_URL')
@@ -37,6 +38,18 @@ def metrics():
 app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
+
+ERROR_COUNTER = Counter('http_errors_total', 'Total number of HTTP errors', ['status'])
+
+@app.errorhandler(404)
+def page_not_found(e):
+    ERROR_COUNTER.labels(status='404').inc()
+    return jsonify(error=str(e)), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    ERROR_COUNTER.labels(status='500').inc()
+    return jsonify(error=str(e)), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
