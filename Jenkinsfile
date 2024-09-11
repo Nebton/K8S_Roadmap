@@ -65,6 +65,7 @@ pipeline {
                     sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --namespace ${env.DEPLOY_ENV} --set global.environment=${env.DEPLOY_ENV} --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
                     sh "kubectl apply -f kubernetes/node-exporter-deployment.yaml"
             }
+        }
         stage('Monitor') {
             steps {
                 sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
