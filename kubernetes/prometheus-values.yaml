@@ -8,6 +8,26 @@ prometheus:
     ruleSelector: {}
     ruleNamespaceSelector: {}
     
+additionalServiceMonitors:
+  - name: node-exporter
+    namespace: prod
+    selector:
+      matchLabels:
+        app: node-exporter
+    endpoints:
+      - port: metrics
+        interval: 15s
+  - name: flask-app-monitor
+    namespace: prod
+    selector:
+      matchLabels:
+        app: backend # Make sure this matches your application's label
+    endpoints:
+      - port: http
+        path: /metrics
+        interval: 15s
+
+
 alertmanager:
   enabled: true
 
