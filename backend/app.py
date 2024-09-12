@@ -45,6 +45,9 @@ def internal_server_error(e):
     ERROR_COUNTER.labels(status='500').inc()
     return jsonify(error=str(e)), 500
 
+@app.route('/error')
+def error() :
+    1 / 0
 
 # Add prometheus wsgi middleware to route /metrics requests
 app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
