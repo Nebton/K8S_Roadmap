@@ -33,12 +33,6 @@ def hello():
 def metrics():
     return Response(generate_latest(REGISTRY), mimetype=CONTENT_TYPE_LATEST)
 
-
-# Add prometheus wsgi middleware to route /metrics requests
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/metrics': make_wsgi_app()
-})
-
 ERROR_COUNTER = Counter('http_errors_total', 'Total number of HTTP errors', ['status'])
 
 @app.errorhandler(404)
@@ -51,5 +45,10 @@ def internal_server_error(e):
     ERROR_COUNTER.labels(status='500').inc()
     return jsonify(error=str(e)), 500
 
+
+# Add prometheus wsgi middleware to route /metrics requests
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
