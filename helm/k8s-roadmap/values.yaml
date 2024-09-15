@@ -20,7 +20,7 @@ environments:
         cpu: 200m
         memory: 256Mi
   prod:
-    replicaCount: 2 
+    replicaCount: 1 
     resources:
       requests:
         cpu: 250m
