@@ -77,8 +77,8 @@ pipeline {
 
             //ELLK stack 
             steps {
-                sh "kubectl create configmap filebeat-configmap --from-file=kubernetes/filebeat-configmap.yaml"
-                sh "kubectl create configmap logstash-configmap --from-file=kubernetes/logstash.conf"
+                //sh "kubectl create configmap filebeat-configmap --from-file=kubernetes/filebeat-configmap.yaml"
+                //sh "kubectl create configmap logstash-configmap --from-file=kubernetes/logstash.conf"
                 sh "kubectl apply -f kubernetes/elk-stack.yaml -n prod"
             }
 
