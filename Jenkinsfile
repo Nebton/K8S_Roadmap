@@ -55,7 +55,7 @@ pipeline {
         stage('Deploy ConfigMap') {
             steps {
                 script {
-                    sh "kubectl apply -f kubernetes/${env.DEPLOY_ENV}-config.yaml"
+                    sh "kubectl apply -f kubernetes/${env.DEPLOY_ENV}-config.yaml --request-timeout=60s"
                 }
             }
         }
