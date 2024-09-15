@@ -67,11 +67,20 @@ pipeline {
             }
         }
         stage('Monitor') {
+            //Prometheus/Grafana stack
+            //steps {
+            //    sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
+            //    sh "helm repo update"
+            //    sh "helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f kubernetes/prometheus-values.yaml -n prod"
+            //    }
+
+            //ELLK stack 
             steps {
-                sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
-                sh "helm repo update"
-                sh "helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f kubernetes/prometheus-values.yaml -n prod"
-                }
+                sh "kubectl create configmap --from-file=kubernetes/filebeat-configmap.yaml"
+                sh "kubectl create configmap --from-file=kubernetes/logstash.conf"
+                sh "kubectl apply -f kubernetes/elk-stack.yaml"
+            }
+
             }
         }
     }
