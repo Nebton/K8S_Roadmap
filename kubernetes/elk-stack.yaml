@@ -124,6 +124,10 @@ spec:
       containers:
       - name: filebeat
         image: docker.elastic.co/beats/filebeat:7.10.0
+        args: [
+          "-c", "/usr/share/filebeat/filebeat-configmap.yaml",
+          "-e",
+        ]
         volumeMounts:
         - name: varlog
           mountPath: /var/log
@@ -131,8 +135,8 @@ spec:
           mountPath: /var/lib/docker/containers
           readOnly: true
         - name: filebeat-config
-          mountPath: /usr/share/filebeat/filebeat-config.yaml
-          subPath: filebeat-config.yaml
+          mountPath: /usr/share/filebeat/filebeat-configmap.yaml
+          subPath: filebeat-configmap.yaml
 
       volumes:
       - name: varlog
