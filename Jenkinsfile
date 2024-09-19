@@ -51,6 +51,17 @@ pipeline {
             }
         }
 
+        stage('Terraform Init') {
+            steps {
+                dir('terraform') {
+                    script {
+                        env.PATH = "${TF_HOME}:${env.PATH}"
+                        sh "terraform init"
+                    }
+                }
+            }
+        }
+
         stage('Terraform Plan') {
             steps {
                 dir('terraform') {
