@@ -1,0 +1,34 @@
+resource "helm_release" "k8s_roadmap" {
+  name       = "k8s-roadmap"
+  chart      = var.helm_chart_path
+  namespace  = var.environment
+  
+  values = [
+    file("${var.helm_chart_path}/values.yaml")
+  ]
+  
+  set {
+    name  = "global.environment"
+    value = var.environment
+  }
+  
+  set {
+    name  = "backend.image.tag"
+    value = split(":", var.backend_image)[1]
+  }
+  
+  set {
+    name  = "frontend.image.tag"
+    value = split(":", var.frontend_image)[1]
+  }
+  
+  set {
+    name  = "backend.replicaCount"
+    value = lookup(yamldecode(file("${var.helm_chart_path}/values.yaml")).environments[var.environment], "replicaCount", 1)
+  }
+  
+  set {
+    name  = "frontend.replicaCount"
+    value = lookup(yamldecode(file("${var.helm_chart_path}/values.yaml")).environments[var.environment], "replicaCount", 1)
+  }
+}

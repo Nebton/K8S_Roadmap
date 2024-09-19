@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE_BACKEND = "nebton544/k8s_roadmap"
         DOCKER_IMAGE_FRONTEND = "nebton544/k8s_roadmap"
         KUBECONFIG = "/var/jenkins_home/config"
+        TF_HOME = tool name: 'Terraform'
     }
     
     stages {
@@ -24,7 +25,6 @@ pipeline {
             }
         }
 
-
         stage('Debug') {
             steps {
                 script {
@@ -33,7 +33,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Build') {
             steps {
@@ -51,37 +50,64 @@ pipeline {
                 }
             }
         }
-        
-        stage('Deploy ConfigMap') {
+
+        stage('Terraform Plan') {
             steps {
-                script {
-                    sh "kubectl apply -f kubernetes/${env.DEPLOY_ENV}-config.yaml --request-timeout=60s"
+                dir('terraform') {
+                    script {
+                        sh """
+                        terraform plan \
+                        -var 'environment=${env.DEPLOY_ENV}' \
+                        -var 'backend_image=${DOCKER_IMAGE_BACKEND}:backend-${GIT_COMMIT}' \
+                        -var 'frontend_image=${DOCKER_IMAGE_FRONTEND}:frontend-${GIT_COMMIT}' \
+                        -out tfplan
+                        """
+                    }
                 }
             }
         }
-
-        stage('Deploy') {
+        
+        stage('Terraform Apply') {
             steps {
-                    sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --namespace ${env.DEPLOY_ENV} --set global.environment=${env.DEPLOY_ENV} --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
-                    
+                dir('terraform') {
+                    script {
+                        sh "terraform apply -auto-approve tfplan"
+                    }
+                }
             }
         }
-        stage('Monitor') {
-            //Prometheus/Grafana stack
-            //steps {
-            //    sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
-            //    sh "helm repo update"
-            //    sh "helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f kubernetes/prometheus-values.yaml -n prod"
-            //sh "kubectl apply -f kubernetes/node-exporter-deployment.yaml"
-            //    }
+        //stage('Deploy ConfigMap') {
+        //    steps {
+        //        script {
+        //            sh "kubectl apply -f kubernetes/${env.DEPLOY_ENV}-config.yaml --request-timeout=60s"
+        //        }
+        //    }
+        //}
 
-            //ELLK stack 
-            steps {
-                //sh "kubectl create configmap filebeat-configmap --from-file=kubernetes/filebeat-configmap.yaml"
-                //sh "kubectl create configmap logstash-configmap --from-file=kubernetes/logstash.conf"
-                sh "kubectl apply -f kubernetes/elk-stack.yaml -n prod"
-            }
+        //stage('Deploy') {
+        //    steps {
+        //            sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --namespace ${env.DEPLOY_ENV} --set global.environment=${env.DEPLOY_ENV} --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
+        //
+        //    }
+        //}
 
-            }
+
+        //stage('Monitor') {
+        //    //Prometheus/Grafana stack
+        //    steps {
+        //        sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
+        //        sh "helm repo update"
+        //        sh "helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f kubernetes/prometheus-values.yaml -n prod"
+        //    sh "kubectl apply -f kubernetes/node-exporter-deployment.yaml"
+        //        }
+        //
+        //    //ELLK stack 
+        //    steps {
+        //        //sh "kubectl create configmap filebeat-configmap --from-file=kubernetes/filebeat-configmap.yaml"
+        //        //sh "kubectl create configmap logstash-configmap --from-file=kubernetes/logstash.conf"
+        //        //sh "kubectl apply -f kubernetes/elk-stack.yaml -n prod"
+        //    }
+        //
+        //    }
         }
-    }
+}
