@@ -3,17 +3,7 @@ variable "environment" {
   type        = string
 }
 
-variable "backend_image" {
-  description = "Backend Docker image"
-  type        = string
-}
-
-variable "frontend_image" {
-  description = "Frontend Docker image"
-  type        = string
-}
-
-variable "helm_chart_path" {
-  description = "Path to the Helm chart"
+variable "config_path" {
+  description = "Path to the monitoring configuration files"
   type        = string
 }
