@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: node-exporter
+  namespace: ${namespace}
 spec:
   replicas: 1
   selector:
@@ -18,15 +19,4 @@ spec:
         ports:
         - containerPort: 9100
           name: metrics
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: node-exporter
-spec:
-  selector:
-    app: node-exporter
-  ports:
-  - protocol: TCP
-    port: 9100
-    targetPort: 9100
+

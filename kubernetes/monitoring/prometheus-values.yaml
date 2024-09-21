@@ -21,12 +21,11 @@ additionalServiceMonitors:
     namespace: prod
     selector:
       matchLabels:
-        app: backend # Make sure this matches your application's label
+        app: backend 
     endpoints:
       - port: http
         path: /metrics
         interval: 15s
-
 
 alertmanager:
   enabled: true

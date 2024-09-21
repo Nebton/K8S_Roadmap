@@ -2,7 +2,7 @@ terraform {
   required_providers {
     kubectl = {
       source  = "gavinbunney/kubectl"
-      version = "~> 1.14.0"  # Use the same version as in the root module
+      version = "~> 1.14.0"  
     }
   }
 }
@@ -27,20 +27,19 @@ set {
     value = var.environment
   }
 }
-data "kubectl_file_documents" "node_exporter" {
-  content = file("${var.config_path}/node-exporter-deployment.yaml")
+
+
+resource "kubectl_manifest" "node_exporter_deployment" {
+  yaml_body  =  templatefile( "${var.config_path}/node-exporter-deployment.yaml", {namespace = var.environment})
+  depends_on = [helm_release.prometheus]
 }
 
-resource "kubectl_manifest" "node_exporter" {
-  for_each  = data.kubectl_file_documents.node_exporter.manifests
-  yaml_body = each.value
+resource "kubectl_manifest" "node_exporter_service" {
+  yaml_body  =  templatefile( "${var.config_path}/node-exporter-service.yaml", {namespace = var.environment})
+  depends_on = [helm_release.prometheus, kubectl_manifest.node_exporter_deployment]
 }
 
-data "kubectl_file_documents" "servicemonitor" {
-  content = file("${var.config_path}/servicemonitor.yaml")
-}
-
-resource "kubectl_manifest" "servicemonitor" {
-  for_each  = data.kubectl_file_documents.servicemonitor.manifests
-  yaml_body = each.value
+resource "kubectl_manifest" "flask-app-monitor" {
+  yaml_body =  templatefile( "${var.config_path}/flask-app-monitor.yaml", {namespace = var.environment})
+  depends_on = [helm_release.prometheus]
 }

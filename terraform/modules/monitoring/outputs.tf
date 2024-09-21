@@ -5,3 +5,4 @@ output "status" {
     servicemonitor = "Deployed"
   }
 }
+
