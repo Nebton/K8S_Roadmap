@@ -1,3 +1,7 @@
 output "status" {
-  value = helm_release.k8s_roadmap.status
+  value = {
+    prometheus     = helm_release.prometheus.status
+    node_exporter  = "Deployed"
+    servicemonitor = "Deployed"
+  }
 }
