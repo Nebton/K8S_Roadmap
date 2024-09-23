@@ -38,16 +38,11 @@ resource "helm_release" "istio_ingress" {
   timeout = 600
 }
 
-resource "kubernetes_namespace_v1" "app_namespace" {
+resource "kubernetes_namespace" "app_namespace" {
   metadata {
     name = var.environment
     labels = {
       "istio-injection" = "enabled"
     }
-  }
-  lifecycle {
-    ignore_changes = [
-      metadata[0].labels,
-    ]
   }
 }
