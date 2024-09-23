@@ -1,7 +1,7 @@
 variable "environment" {
   description = "Deployment environment (dev, staging, prod)"
   type        = string
-  default     = "prod"
+  default     = "monitoring"
 }
 
 variable "config_path" {
