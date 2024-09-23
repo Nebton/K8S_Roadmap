@@ -33,5 +33,5 @@ variable "backend_autoscaling_max_replicas" {
 variable "backend_autoscaling_cpu_threshold" {
   description = "CPU utilization threshold for scaling"
   type        = number
-  default     = 50
+  default     = 20
 }
