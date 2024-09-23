@@ -16,7 +16,8 @@ spec:
       - name: frontend
         image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
         ports:
-        - containerPort: {{ .Values.frontend.port }}
+        - name : {{ .Values.frontend.portname }} 
+          containerPort: {{ .Values.frontend.port }}
         resources: {{- toYaml (index .Values.environments .Values.global.environment "resources") | nindent 12 }}
         envFrom: 
           - configMapRef:

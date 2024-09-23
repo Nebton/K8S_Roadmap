@@ -11,7 +11,7 @@ spec:
     metadata:
       labels:
         app: backend
-    spec:
+      annotations: {{- toYaml (index .Values.backend "annotations") | nindent 8 }}
       containers:
       - name: backend
         image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
