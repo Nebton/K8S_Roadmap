@@ -12,7 +12,7 @@ resource "helm_release" "prometheus" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   namespace  = var.environment
-
+  replace = true
   values = [
     file("${var.config_path}/prometheus-values.yaml")
   ]
