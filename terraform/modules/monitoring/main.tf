@@ -12,7 +12,6 @@ resource "helm_release" "prometheus" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   namespace  = var.environment
-  create_namespace = true
 
   values = [
     file("${var.config_path}/prometheus-values.yaml")
@@ -28,4 +27,11 @@ set {
     value = var.environment
   }
 }
+
+resource "kubernetes_namespace" "app_namespace" {
+  metadata {
+    name = var.environment
+  }
+}
+
 
