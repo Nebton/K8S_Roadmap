@@ -10,7 +10,7 @@ prometheus:
     
 additionalServiceMonitors:
   - name: node-exporter
-    namespace: prod
+    namespace: monitoring 
     selector:
       matchLabels:
         app: node-exporter
@@ -18,7 +18,7 @@ additionalServiceMonitors:
       - port: metrics
         interval: 15s
   - name: flask-app-monitor
-    namespace: prod
+    namespace: monitoring 
     selector:
       matchLabels:
         app: backend 
