@@ -2,12 +2,12 @@ resource "helm_release" "istio_base" {
   name             = "istio-base"
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "base"
-  namespace        = "istio-system"
+  namespace        = var.environment
   create_namespace = true
 
   set {
     name  = "global.istioNamespace"
-    value = "istio-system"
+    value = var.environment 
   }
 }
 
@@ -15,7 +15,7 @@ resource "helm_release" "istiod" {
   name       = "istiod"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "istiod"
-  namespace  = "istio-system"
+  namespace  = var.environment
   depends_on = [helm_release.istio_base]
 
   set {
@@ -32,7 +32,7 @@ resource "helm_release" "istio_ingress" {
   name       = "istio-ingress"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"
-  namespace  = "istio-system"
+  namespace  = var.environment
   depends_on = [helm_release.istiod]
 
   timeout = 600
@@ -40,7 +40,7 @@ resource "helm_release" "istio_ingress" {
 
 resource "kubernetes_namespace" "app_namespace" {
   metadata {
-    name = var.environment
+    name = var.environment 
     labels = {
       "istio-injection" = "enabled"
     }
