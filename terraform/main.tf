@@ -54,8 +54,8 @@ module "monitoring" {
   depends_on  = [module.kubernetes_resources]
 }
 
-#module "istio" {
-#  source      = "./modules/istio"
-#  environment = "istio-system"
-#  depends_on  = [module.kubernetes_resources]
-#}
+module "istio" {
+  source      = "./modules/istio"
+  environment = "istio-system"
+  depends_on  = [module.kubernetes_resources]
+}
