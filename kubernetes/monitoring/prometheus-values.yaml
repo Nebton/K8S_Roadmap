@@ -4,6 +4,13 @@ prometheus:
     probeSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false   
+    serviceMonitorNamespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: In
+          values:
+            - monitoring
+            - prod
 additionalServiceMonitors:
   - name: node-exporter
     namespace: monitoring 
@@ -14,7 +21,7 @@ additionalServiceMonitors:
       - port: metrics
         interval: 15s
   - name: flask-app-monitor
-    namespace: monitoring
+    namespace: prod 
     labels:
       release: prometheus
     namespaceSelector:

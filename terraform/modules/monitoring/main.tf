@@ -27,10 +27,10 @@ resource "helm_release" "prometheus" {
     value = var.environment
   }
   
-  set {
-    name  = "additionalServiceMonitors[1].namespace"
-    value = var.environment
-  }
+  #set {
+  #  name  = "additionalServiceMonitors[1].namespace"
+  #  value = var.environment
+  #}
 
   replace = true
   force_update  = true
