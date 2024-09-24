@@ -4,13 +4,8 @@ prometheus:
     probeSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false   
-    serviceMonitorNamespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: In
-          values:
-            - monitoring
-            - prod
+    serviceMonitorNamespaceSelectorUsesHelmValues: false
+
 additionalServiceMonitors:
   - name: node-exporter
     namespace: monitoring 
