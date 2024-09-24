@@ -1,18 +1,9 @@
 prometheus:
   prometheusSpec:
-    serviceMonitorSelectorNilUsesHelmValues: false
-    serviceMonitorSelector: 
-      matchLabels:
-        release: prometheus
-    serviceMonitorNamespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: In
-          values:
-            - monitoring
-    ruleSelector: {}
-    ruleNamespaceSelector: {}
-    
+    podMonitorSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false   
 additionalServiceMonitors:
   - name: node-exporter
     namespace: monitoring 
