@@ -2,14 +2,18 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: flask-app-monitor
-  namespace: ${namespace}
+  namespace: monitoring
   labels:
-    release: prometheus 
+    release: prometheus
 spec:
+  jobLabel: app
+  namespaceSelector:
+    matchNames:
+      - prod
   selector:
     matchLabels:
-      app: backend  
+      app: backend
   endpoints:
-  - port: http 
+  - port: http
     path: /metrics
     interval: 15s

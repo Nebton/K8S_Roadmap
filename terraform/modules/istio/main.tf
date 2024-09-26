@@ -41,16 +41,12 @@ resource "helm_release" "istio_ingress" {
   name       = "istio-ingress"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"
-  version    = "1.21.6"  # Pin the version
+  version    = "1.23.2"  # Pin the version
   namespace  = var.environment
   timeout    = 1200  # 20 minutes
 
   depends_on = [helm_release.istiod]
 
-  set {
-    name  = "waitForGateway.enabled"
-    value = "true"
-  }
 }
 
 # Application Namespace
