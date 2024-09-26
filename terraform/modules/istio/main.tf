@@ -3,7 +3,7 @@ resource "helm_release" "istio_base" {
   name             = "istio-base"
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "base"
-  version          = "1.21.6"  # Pin the version
+  version          = "1.23.2"  # Pin the version
   namespace        = var.environment
   create_namespace = true
   timeout          = 900  # 15 minutes
@@ -19,7 +19,7 @@ resource "helm_release" "istiod" {
   name       = "istiod"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "istiod"
-  version    = "1.21.6"  # Pin the version
+  version    = "1.23.2"  # Pin the version
   namespace  = var.environment
   timeout    = 900  # 15 minutes
 
@@ -32,7 +32,7 @@ resource "helm_release" "istiod" {
 
   set {
     name  = "global.tag"
-    value = "1.21.6"
+    value = "1.23.2"
   }
 }
 
