@@ -1,7 +1,7 @@
 resource "helm_release" "k8s_roadmap" {
   name       = "k8s-roadmap"
   chart      = var.helm_chart_path
-  namespace  = kubernetes_namespace.app_namespace.metadata[0].name 
+  namespace  = var.environment 
   
   values = [
     file("${var.helm_chart_path}/values.yaml")
