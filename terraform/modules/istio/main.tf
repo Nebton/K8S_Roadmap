@@ -41,11 +41,17 @@ resource "helm_release" "istio_ingress" {
   name       = "istio-ingress"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"
-  version    = "1.23.2"  # Pin the version
+  version    = "1.23.2"  
   namespace  = var.environment
-  timeout    = 1200  # 20 minutes
+  timeout    = 300  
 
   depends_on = [helm_release.istiod]
+  wait       = false
+
+  set {
+    name = "service.type"
+    value = "NodePort"
+  }
 
 }
 
