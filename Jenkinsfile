@@ -82,7 +82,7 @@ pipeline {
             steps {
                 dir('terraform') {
                     script {
-                        sh "TF_LOG=DEBUG terraform apply -auto-approve tfplan"
+                        sh "terraform apply -auto-approve tfplan"
                     }
                 }
             }
