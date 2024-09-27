@@ -3,6 +3,11 @@ variable "environment" {
   type        = string
 }
 
+variable "config_path" {
+  description = "Path to the app additional configuration files"
+  type        = string
+}
+
 variable "backend_image" {
   description = "Backend Docker image"
   type        = string

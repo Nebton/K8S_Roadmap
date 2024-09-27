@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.14.0"  
+    }
+  }
+}
+
 resource "helm_release" "k8s_roadmap" {
   name       = "k8s-roadmap"
   chart      = var.helm_chart_path
@@ -53,3 +62,10 @@ resource "helm_release" "k8s_roadmap" {
   }
 
 }
+
+resource "kubectl_manifest" "frontend_backend_route" {
+  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", { namespace = var.environment })
+  depends_on = [helm_release.k8s_roadmap]
+}
+
+

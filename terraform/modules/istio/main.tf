@@ -118,9 +118,3 @@ resource "kubectl_manifest" "istio_ingress_servicemonitor" {
   depends_on = [kubectl_manifest.istio_ingress_gateway]
 }
 
-resource "kubectl_manifest" "frontend_backend_route" {
-  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", { namespace = var.environment })
-  depends_on = [kubectl_manifest.istio_ingress_servicemonitor]
-}
-
-

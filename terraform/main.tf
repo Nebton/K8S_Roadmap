@@ -38,6 +38,7 @@ module "kubernetes_resources" {
 module "application" {
   source         = "./modules/application"
   environment    = var.environment
+  config_path = "${path.root}/../kubernetes/app"
   backend_image  = var.backend_image
   frontend_image = var.frontend_image
   helm_chart_path = "${path.root}/../helm/k8s-roadmap"
