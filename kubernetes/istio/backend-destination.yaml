@@ -1,0 +1,9 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: backend-destination
+spec:
+  host: backend-service
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN

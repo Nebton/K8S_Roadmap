@@ -50,17 +50,65 @@ resource "helm_release" "istio_ingress" {
   name       = "istio-ingress"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"
-  version    = "1.23.2"  
+  version    = "1.23.2"
   namespace  = var.environment
-  timeout    = 300  
-
+  timeout    = 300
   depends_on = [helm_release.istiod]
   wait       = false
 
   set {
-    name = "service.type"
+    name  = "service.type"
     value = "NodePort"
   }
 
+  # Enable Prometheus scraping
+  set {
+    name  = "meshConfig.enablePrometheusMerge"
+    value = "true"
+  }
+
+  # Expose Prometheus metrics port
+  set {
+    name  = "service.ports[4].name"
+    value = "http-envoy-prom"
+  }
+  set {
+    name  = "service.ports[4].port"
+    value = "15020"
+  }
+  set {
+    name  = "service.ports[4].targetPort"
+    value = "15020"
+  }
+
+  # Set annotations for Prometheus scraping
+  set {
+    name  = "annotations.prometheus\\.io/scrape"
+    value = "true"
+  }
+  set {
+    name  = "annotations.prometheus\\.io/port"
+    value = "15020"
+  }
+  set {
+    name  = "annotations.prometheus\\.io/path"
+    value = "/stats/prometheus"
+  }
 }
+
+resource "kubectl_manifest" "istio_ingress_gateway" {
+  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-gateway.yaml")
+  depends_on = [helm_release.istio_ingress]
+}
+
+resource "kubectl_manifest" "istio_ingress_servicemonitor" {
+  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-servicemonitor.yaml")
+  depends_on = [kubectl_manifest.istio_ingress_gateway]
+}
+
+resource "kubectl_manifest" "frontend_backend_route" {
+  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml")
+  depends_on = [kubectl_manifest.istio_ingress_servicemonitor]
+}
+
 

@@ -1,0 +1,13 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+spec:
+  addonComponents:
+    tracing:
+      enabled: true
+  values:
+    global:
+      tracer:
+        zipkin:
+          address: jaeger-collector.monitoring:9411

@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: fault-injection
+spec:
+  hosts:
+  - backend-service
+  http:
+  - fault:
+      delay:
+        percentage:
+          value: 10
+        fixedDelay: 5s
+    route:
+    - destination:
+        host: backend-service
+        port:
+          number: 5000

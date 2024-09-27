@@ -57,5 +57,6 @@ module "monitoring" {
 module "istio" {
   source      = "./modules/istio"
   environment = "istio-system"
+  config_path = "${path.root}/../kubernetes/istio"
   depends_on  = [module.kubernetes_resources]
 }
