@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.14.0"  
+    }
+  }
+}
+
 # Application Namespace
 resource "kubernetes_namespace" "app_namespace" {
   metadata {
