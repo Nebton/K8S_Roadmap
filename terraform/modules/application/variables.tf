@@ -3,6 +3,11 @@ variable "environment" {
   type        = string
 }
 
+variable "istio_environment" {
+  description = "Environment variable from the istio module"
+  type        = string
+}
+
 variable "config_path" {
   description = "Path to the app additional configuration files"
   type        = string

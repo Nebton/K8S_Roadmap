@@ -38,6 +38,7 @@ module "kubernetes_resources" {
 module "application" {
   source         = "./modules/application"
   environment    = var.environment
+  istio_environment = "istio-system"
   config_path = "${path.root}/../kubernetes/app"
   backend_image  = var.backend_image
   frontend_image = var.frontend_image
