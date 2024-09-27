@@ -118,7 +118,7 @@ resource "kubectl_manifest" "istio_ingress_servicemonitor" {
   depends_on = [kubectl_manifest.istio_ingress_gateway]
 }
 
-resource "kubectl_manifest" "frontend_backend_route" {
+resource "kubectl_manifest" "backend_round_robin" {
   yaml_body  =  templatefile( "${var.config_path}/backend-destination.yaml", {})
   depends_on = [kubectl_manifest.istio_ingress_gateway]
   override_namespace = var.injected_namespace
