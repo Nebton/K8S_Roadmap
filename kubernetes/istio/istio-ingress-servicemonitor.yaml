@@ -13,7 +13,7 @@ spec:
       istio: ingress
   namespaceSelector:
     matchNames:
-    - ${var.environment} 
+    - ${namespace} 
   endpoints:
   - port: http-envoy-prom
     path: /stats/prometheus

@@ -106,17 +106,17 @@ resource "helm_release" "istio_ingress" {
 }
 
 resource "kubectl_manifest" "istio_ingress_gateway" {
-  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-gateway.yaml", {})
+  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-gateway.yaml", { namespace = var.environment })
   depends_on = [helm_release.istio_ingress]
 }
 
 resource "kubectl_manifest" "istio_ingress_servicemonitor" {
-  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-servicemonitor.yaml", {})
+  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-servicemonitor.yaml", { namespace = var.environment })
   depends_on = [kubectl_manifest.istio_ingress_gateway]
 }
 
 resource "kubectl_manifest" "frontend_backend_route" {
-  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", {})
+  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", { namespace = var.environment })
   depends_on = [kubectl_manifest.istio_ingress_servicemonitor]
 }
 

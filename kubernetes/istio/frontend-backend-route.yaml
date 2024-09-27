@@ -6,7 +6,7 @@ spec:
   hosts:
   - "*"
   gateways:
-  - ${var.environment}/istio-ingress-gateway
+  - ${namespace}/istio-ingress-gateway
   http:
   - match:
     - uri:
