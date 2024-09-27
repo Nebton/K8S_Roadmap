@@ -59,6 +59,7 @@ module "monitoring" {
 module "istio" {
   source      = "./modules/istio"
   environment = "istio-system"
+  injected_namespace = var.environment
   config_path = "${path.root}/../kubernetes/istio"
   depends_on  = [module.kubernetes_resources]
 }
