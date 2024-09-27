@@ -124,4 +124,11 @@ resource "kubectl_manifest" "backend_round_robin" {
   override_namespace = var.injected_namespace
 }
 
+resource "kubectl_manifest" "mtls_policy" {
+  yaml_body  =  templatefile( "${var.config_path}/mtls_enable.yaml", {})
+  depends_on = [kubectl_manifest.istio_ingress_gateway]
+  override_namespace = var.environment
+}
+
+
 
