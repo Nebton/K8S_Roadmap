@@ -65,46 +65,49 @@ resource "helm_release" "istio_ingress" {
   depends_on = [helm_release.istiod]
   wait       = false
 
-  set {
-    name  = "service.type"
-    value = "NodePort"
-  }
-
-  # Enable Prometheus scraping
-  set {
-    name  = "meshConfig.enablePrometheusMerge"
-    value = "true"
-  }
-
-  # Expose Prometheus metrics port
-  set {
-    name  = "service.ports[4].name"
-    value = "http-envoy-prom"
-  }
-  set {
-    name  = "service.ports[4].port"
-    value = "15020"
-  }
-  set {
-    name  = "service.ports[4].targetPort"
-    value = "15020"
-  }
-
-  # Set annotations for Prometheus scraping
-  set {
-    name  = "annotations.prometheus\\.io/scrape"
-    value = "true"
-  }
-  set {
-    name  = "annotations.prometheus\\.io/port"
-    value = "15020"
-  }
-  set {
-    name  = "annotations.prometheus\\.io/path"
-    value = "/stats/prometheus"
-  }
+  values = [
+    yamlencode({
+      service = {
+        type = "NodePort"
+        ports = [
+          {
+            name       = "status-port"
+            port       = 15021
+            targetPort = 15021
+          },
+          {
+            name       = "http2"
+            port       = 80
+            targetPort = 8080
+          },
+          {
+            name       = "https"
+            port       = 443
+            targetPort = 8443
+          },
+          {
+            name       = "tcp"
+            port       = 31400
+            targetPort = 31400
+          },
+          {
+            name       = "http-envoy-prom"
+            port       = 15020
+            targetPort = 15020
+          }
+        ]
+      }
+      meshConfig = {
+        enablePrometheusMerge = true
+      }
+      annotations = {
+        "prometheus.io/scrape" = "true"
+        "prometheus.io/port"   = "15020"
+        "prometheus.io/path"   = "/stats/prometheus"
+      }
+    })
+  ]
 }
-
 resource "kubectl_manifest" "istio_ingress_gateway" {
   yaml_body  =  templatefile( "${var.config_path}/istio-ingress-gateway.yaml", { namespace = var.environment })
   depends_on = [helm_release.istio_ingress]
