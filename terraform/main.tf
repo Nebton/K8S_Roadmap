@@ -35,6 +35,14 @@ module "kubernetes_resources" {
   config_path = "${path.root}/../kubernetes/config/${var.environment}-config.yaml"
 }
 
+module "istio" {
+  source      = "./modules/istio"
+  environment = "istio-system"
+  injected_namespace = var.environment
+  config_path = "${path.root}/../kubernetes/istio"
+  depends_on  = [module.kubernetes_resources]
+}
+
 module "application" {
   source         = "./modules/application"
   environment    = var.environment
@@ -56,10 +64,3 @@ module "monitoring" {
   depends_on  = [module.kubernetes_resources]
 }
 
-module "istio" {
-  source      = "./modules/istio"
-  environment = "istio-system"
-  injected_namespace = var.environment
-  config_path = "${path.root}/../kubernetes/istio"
-  depends_on  = [module.kubernetes_resources]
-}
