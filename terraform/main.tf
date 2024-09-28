@@ -51,7 +51,7 @@ module "application" {
   backend_image  = var.backend_image
   frontend_image = var.frontend_image
   helm_chart_path = "${path.root}/../helm/k8s-roadmap"
-  depends_on     = [module.kubernetes_resources]
+  depends_on     = [module.istio]
   backend_autoscaling_min_replicas = var.backend_autoscaling_min_replicas
   backend_autoscaling_max_replicas = var.backend_autoscaling_max_replicas
   backend_autoscaling_cpu_threshold = var.backend_autoscaling_cpu_threshold
