@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'BACKEND_VERSIONS', defaultValue: '[v1,v2]', description: 'Comma-separated list of backend versions to deploy')
+        string(name: 'BACKEND_VERSIONS', defaultValue: '["v1","v2"]', description: 'Comma-separated list of backend versions to deploy')
     }
 
     environment {
