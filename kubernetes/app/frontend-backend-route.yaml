@@ -10,7 +10,7 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /api
+        exact: /api/hello
     route:
     - destination:
         host: backend-service

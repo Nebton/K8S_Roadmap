@@ -1,22 +1,6 @@
 {{- if .Values.istio.enabled }}
 ---
 apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: frontend
-spec:
-  hosts:
-  - {{ .Values.istio.virtualServices.frontend.host | quote }}
-  gateways:
-  - {{ .Values.istio.gateway.name }}
-  http:
-  - route:
-    - destination:
-        host: {{ .Values.frontend.service.name | default "frontend-service" }}
-        port:
-          number: {{ .Values.frontend.port }}
----
-apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: frontend
@@ -25,20 +9,6 @@ spec:
   trafficPolicy:
     loadBalancer:
       simple: ROUND_ROBIN
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: backend
-spec:
-  hosts:
-  - {{ .Values.istio.virtualServices.backend.host }}
-  http:
-  - route:
-    - destination:
-        host: {{ .Values.backend.service.name | default "backend-service" }}
-        port:
-          number: {{ .Values.backend.port }}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
