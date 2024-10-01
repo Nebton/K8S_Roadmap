@@ -75,12 +75,11 @@ pipeline {
                 dir('terraform') {
                     script {
                         sh """
-                        def backendVersionsList = BACKEND_VERSIONS.split(',').collect { "\"${it.trim()}\"" }.join(',')
                         terraform plan \
                         -var 'environment=${env.DEPLOY_ENV}' \
                         -var 'backend_image=${DOCKER_IMAGE_BACKEND}:backend-${GIT_COMMIT}' \
                         -var 'frontend_image=${DOCKER_IMAGE_FRONTEND}:frontend-${GIT_COMMIT}' \
-                        -var 'backend_versions=[${backendVersionsList}]' \
+                        -var 'backend_versions=["v1","v2"]' \
                         -out tfplan
                         """
                     }
