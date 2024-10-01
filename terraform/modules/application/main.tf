@@ -61,6 +61,11 @@ resource "helm_release" "k8s_roadmap" {
     value = var.backend_autoscaling_cpu_threshold
   }
 
+  set {
+    name  = "backend.versions"
+    value = "{${join(",", var.backend_versions)}}"
+  }
+
 }
 
 resource "kubectl_manifest" "frontend_backend_route" {

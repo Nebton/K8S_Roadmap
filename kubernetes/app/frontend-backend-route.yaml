@@ -18,10 +18,10 @@ spec:
         port:
           number: 5000
     fault:
-      delay:
+      abort:
         percentage:
           value: 10 
-        fixedDelay: 10s
+        httpStatus: 500
   - route:
     - destination:
         host: frontend-service.prod.svc.cluster.local

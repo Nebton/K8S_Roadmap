@@ -1,5 +1,3 @@
-global:
-  environment: dev
 environments:
   dev:
     replicaCount: 2
@@ -30,6 +28,9 @@ environments:
         memory: 512Mi
 
 backend:
+  versions:
+    - v1
+    - v2
   service:
     name: backend-service
   image:
