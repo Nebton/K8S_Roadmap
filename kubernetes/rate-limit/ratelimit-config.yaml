@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ratelimit-config
+data:
+  config.yaml: |
+    domain: ratelimit
+    descriptors:
+      - key: PATH
+        value: "/api/hello"
+        rate_limit:
+          unit: minute
+          requests_per_unit: 5
+      - key: PATH
+        rate_limit:
+          unit: minute
+          requests_per_unit: 100
