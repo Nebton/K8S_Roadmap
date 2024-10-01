@@ -24,9 +24,10 @@ spec:
       - name: backend-{{ . }}
         image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}-{{ . }}
         ports:
-        - name : {{ .Values.backend.portname }}
+        - name: {{ .Values.backend.portname }}
           containerPort: {{ .Values.backend.port }}
         resources: {{- toYaml (index .Values.environments .Values.global.environment "resources") | nindent 12 }}
-       envFrom: 
-        - configMapRef:
-           name: app-config
+        envFrom: 
+          - configMapRef:
+              name: app-config
+{{- end }}
