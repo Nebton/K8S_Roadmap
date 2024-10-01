@@ -18,6 +18,12 @@ variable "backend_image" {
   type        = string
 }
 
+variable "backend_versions" {
+  description = "List of backend versions to deploy"
+  type        = list(string)
+  default     = ["v1", "v2"]
+}
+
 variable "frontend_image" {
   description = "Frontend Docker image"
   type        = string
