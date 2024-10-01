@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'BACKEND_VERSIONS', defaultValue: 'v1,v2', description: 'Comma-separated list of backend versions to deploy')
+        string(name: 'BACKEND_VERSIONS', defaultValue: '[v1,v2]', description: 'Comma-separated list of backend versions to deploy')
     }
 
     environment {
@@ -79,7 +79,7 @@ pipeline {
                         -var 'environment=${env.DEPLOY_ENV}' \
                         -var 'backend_image=${DOCKER_IMAGE_BACKEND}:backend-${GIT_COMMIT}' \
                         -var 'frontend_image=${DOCKER_IMAGE_FRONTEND}:frontend-${GIT_COMMIT}' \
-                        -var 'backend_versions=\[${BACKEND_VERSIONS}\]' \
+                        -var 'backend_versions=${BACKEND_VERSIONS}' \
                         -out tfplan
                         """
                     }
