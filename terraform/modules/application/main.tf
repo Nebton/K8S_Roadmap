@@ -74,4 +74,9 @@ resource "kubectl_manifest" "frontend_backend_route" {
   override_namespace = var.environment
 }
 
+resource "kubectl_manifest" "split_traffic" {
+  yaml_body  =  templatefile( "${var.config_path}/split-traffic.yaml", {})
+  depends_on = [kubectl_manifest.frontend_backend_route]
+  override_namespace = var.environment
+}
 

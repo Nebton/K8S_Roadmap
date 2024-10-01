@@ -11,9 +11,11 @@ spec:
   - match:
     - uri:
         exact: /api/hello
+    - uri:
+        exact: /error
     route:
     - destination:
-        host: backend-service.prod.svc.cluster.local
+        host: backend-service
         port:
           number: 5000
     fault:
@@ -23,7 +25,7 @@ spec:
         fixedDelay: 10s
   - route:
     - destination:
-        host: frontend-service.prod.svc.cluster.local
+        host: frontend-service
         port:
           number: 5050
     fault:

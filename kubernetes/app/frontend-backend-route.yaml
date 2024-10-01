@@ -11,24 +11,23 @@ spec:
   - match:
     - uri:
         exact: /api/hello
+    - uri:
         exact: /error
     route:
     - destination:
-        host: backend-service.prod.svc.cluster.local
+        host: backend-service
+        subset: v1
         port:
           number: 5000
-    fault:
-      abort:
-        percentage:
-          value: 10 
-        httpStatus: 500
+      weight: 10
+    - destination:
+        host: backend-service
+        subset: v2
+        port:
+          number: 5000
+      weight: 90
   - route:
     - destination:
-        host: frontend-service.prod.svc.cluster.local
+        host: frontend-service
         port:
           number: 5050
-    fault:
-      abort:
-        percentage:
-          value: 10 
-        httpStatus: 500
