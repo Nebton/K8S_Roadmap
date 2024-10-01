@@ -9,7 +9,6 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from prometheus_client import make_wsgi_app
 
 app = Flask(__name__)
-
 # Configure caching
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
@@ -33,8 +32,9 @@ def hello():
     REQUESTS.inc()
     start = time.time()
     
-    # Simulate some processing
-    time.sleep(0.1)
+    # Introduce an artificial delay for timeout testing
+    delay = int(request.args.get('delay', 0))
+    time.sleep(delay)
     
     # New feature: personalized greeting
     name = request.args.get('name', 'World')
@@ -45,7 +45,7 @@ def hello():
         "api_url": api_url,
         "log_level": log_level,
         "version": "v2",
-        "features": ["Personalized greeting", "Caching", "Enhanced metrics"]
+        "features": ["Personalized greeting", "Caching", "Enhanced metrics", "Timeout testing", "Retry testing"]
     }
     
     PROCESS_TIME.observe(time.time() - start)
@@ -87,7 +87,11 @@ def internal_server_error(e):
 
 @app.route('/error')
 def error():
-    1 / 0
+    # Simulate random failures for retry testing
+    if random.random() < 0.5:  # 50% chance of failure
+        return jsonify({"message": "Success"}), 200
+    else:
+        return jsonify({"error": "Internal Server Error"}), 500
 
 @app.before_request
 def before_request():
