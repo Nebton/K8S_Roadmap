@@ -64,7 +64,7 @@ resource "helm_release" "k8s_roadmap" {
 }
 
 resource "kubectl_manifest" "frontend_backend_route" {
-  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", { namespace = var.istio_environment })
+  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", {})
   depends_on = [helm_release.k8s_roadmap]
   override_namespace = var.environment
 }
