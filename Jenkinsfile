@@ -79,7 +79,7 @@ pipeline {
                         -var 'environment=${env.DEPLOY_ENV}' \
                         -var 'backend_image=${DOCKER_IMAGE_BACKEND}:backend-${GIT_COMMIT}' \
                         -var 'frontend_image=${DOCKER_IMAGE_FRONTEND}:frontend-${GIT_COMMIT}' \
-                        -var 'backend_versions=["v1","v2"]' \
+                        -var 'backend_versions=\[${BACKEND_VERSIONS}\]' \
                         -out tfplan
                         """
                     }
