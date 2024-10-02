@@ -11,6 +11,9 @@ resource "kubernetes_namespace" "monitoring" {
   metadata {
     name = var.environment
   }
+  labels = {
+      istio-injection = "enabled"
+    }
 }
 
 resource "helm_release" "prometheus" {

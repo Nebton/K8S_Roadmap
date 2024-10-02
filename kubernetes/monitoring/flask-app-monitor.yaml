@@ -11,7 +11,7 @@ spec:
   jobLabel: app
   namespaceSelector:
     matchNames:
-      - prod
+      - ${namespace}
   selector:
     matchLabels:
       app: backend
