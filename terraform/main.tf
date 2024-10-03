@@ -66,3 +66,10 @@ module "monitoring" {
   depends_on  = [module.kubernetes_resources]
 }
 
+module "logging" {
+  source      = "./modules/logging"
+  environment = "logging" 
+  config_path = "${path.root}/../kubernetes/logging"
+  depends_on  = [module.kubernetes_resources]
+}
+
