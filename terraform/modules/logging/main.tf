@@ -17,7 +17,7 @@ resource "kubernetes_namespace" "logging" {
 }
 
 resource "helm_release" "elastic-search" {
-  name       = "prometheus"
+  name       = "elasticsearch"
   repository = "https://helm.elastic.co" 
   chart      = "elasticsearch"
   namespace  = kubernetes_namespace.logging.metadata[0].name
