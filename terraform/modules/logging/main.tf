@@ -29,6 +29,11 @@ resource "helm_release" "elastic-search" {
   force_update  = true
   cleanup_on_fail = true
 
+  timeout = 600 
+
+  wait             = true
+  wait_for_jobs    = true
+  atomic           = true
   depends_on = [kubernetes_namespace.logging]
 }
 
