@@ -2,7 +2,7 @@ terraform {
   required_providers {
     kubectl = {
       source  = "gavinbunney/kubectl"
-      version = "~> 1.14.0"  # Use the same version as in the root module
+      version = "~> 1.14.0"  
     }
   }
 }

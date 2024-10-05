@@ -55,3 +55,8 @@ resource "kubectl_manifest" "flask-app-monitor" {
   yaml_body =  templatefile( "${var.config_path}/flask-app-monitor.yaml", {namespace = var.environment})
   depends_on = [helm_release.prometheus]
 }
+
+resource "kubectl_manifest" "istio_ingress_servicemonitor" {
+  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-servicemonitor.yaml", { namespace = var.environment })
+  depends_on = [helm_release.prometheus]
+}

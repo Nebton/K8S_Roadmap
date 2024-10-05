@@ -113,10 +113,7 @@ resource "kubectl_manifest" "istio_ingress_gateway" {
   depends_on = [helm_release.istio_ingress]
 }
 
-resource "kubectl_manifest" "istio_ingress_servicemonitor" {
-  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-servicemonitor.yaml", { namespace = var.environment })
-  depends_on = [kubectl_manifest.istio_ingress_gateway]
-}
+
 
 resource "kubectl_manifest" "backend_round_robin" {
   yaml_body  =  templatefile( "${var.config_path}/backend-destination.yaml", {})
