@@ -15,8 +15,26 @@ data:
             matchers:
             - logs_path:
                 logs_path: "/var/log/containers/"
+        - drop_event:
+            when:
+              equals:
+                kubernetes.container.name: "filebeat"
+        - add_cloud_metadata: ~
+        - add_host_metadata: ~
 
     output.logstash:
       hosts: ["logstash:5044"]
+      loadbalance: true
+      worker: 2
+      bulk_max_size: 2048
 
-    logging.level: debug
+    logging.level: info
+
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
+    queue.mem:
+      events: 4096
+      flush.min_events: 512
+      flush.timeout: 5s
