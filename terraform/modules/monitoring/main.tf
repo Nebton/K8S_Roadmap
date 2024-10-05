@@ -10,9 +10,6 @@ terraform {
 resource "kubernetes_namespace" "monitoring" {
   metadata {
     name = var.environment
-  labels = {
-      istio-injection = "enabled"
-    }
   }
 }
 
@@ -41,9 +38,6 @@ resource "helm_release" "prometheus" {
 
   timeout = 600 
 
-  wait             = true
-  wait_for_jobs    = true
-  atomic           = true
   depends_on = [kubernetes_namespace.monitoring]
 }
 

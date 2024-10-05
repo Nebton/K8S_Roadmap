@@ -5,6 +5,12 @@ prometheus:
     ruleSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false   
     serviceMonitorNamespaceSelectorUsesHelmValues: false
+    storage:
+      volumeClaimTemplate:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi  
 
 additionalServiceMonitors:
   - name: node-exporter
@@ -36,6 +42,11 @@ alertmanager:
 grafana:
   enabled: true
   adminPassword: prom-operator
+  persistence:
+    enabled: true
+    accessModes: ["ReadWriteOnce"]
+    size: 1Gi  
 
 prometheusOperator:
   createCustomResource: true
+
