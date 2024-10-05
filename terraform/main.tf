@@ -29,11 +29,11 @@ provider "kubectl" {
   config_path = var.kube_config_path
 }
 
-# module "kubernetes_resources" {
-#   source      = "./modules/kubernetes"
-#   environment = var.environment
-#   config_path = "${path.root}/../kubernetes/config/${var.environment}-config.yaml"
-# }
+module "kubernetes_resources" {
+  source      = "./modules/kubernetes"
+  environment = var.environment
+  config_path = "${path.root}/../kubernetes/config/${var.environment}-config.yaml"
+}
 
 # module "istio" {
 #   source      = "./modules/istio"
