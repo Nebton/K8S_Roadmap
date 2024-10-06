@@ -1,17 +1,25 @@
+{{- if not .Values.backend.versions }}
+{{- fail "At least one backend version must be specified in .Values.backend.versions" }}
+{{- end }}
+{{- $root := . }}
+{{- range .Values.backend.versions }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: backend-service-{{ . }}
   annotations:
     prometheus.io/port: "metrics"
     prometheus.io/scrape: "true"
   labels: 
     app: backend
+    version: {{ . }}
 spec:
   selector:
-    app: backend
+    version: {{ . }}
   ports:
-    - name: {{ .Values.backend.portname }}
+    - name: {{ $root.Values.backend.portname }}
       protocol: TCP
-      port: {{ .Values.backend.port }}
-      targetPort: {{ .Values.backend.port }}
+      port: {{ $root.Values.backend.port }}
+      targetPort: {{ $root.Values.backend.port }}
+{{- end }}

@@ -38,7 +38,7 @@ backend:
     name: backend-service
   image:
     repository: nebton544/k8s_roadmap
-    tag: backend-latest
+    tag: backend-6aa43b259e50a051433ab35e58ab3013025d8355 
   replicaCount: 1
   port: 5000
   portname: http
@@ -56,24 +56,9 @@ frontend:
     name: frontend-service
   image:
     repository: nebton544/k8s_roadmap
-    tag: frontend-latest
+    tag: frontend-6aa43b259e50a051433ab35e58ab3013025d8355
   replicaCount: 1
   port: 5050
   portname: http
   service:
     type: ClusterIP # Used to be NodePort. Cluster IP is for Istio to handle external access  
-
-istio:
-  enabled: true
-  gateway:
-    name: istio-system/istio-ingressgateway
-  virtualServices:
-    frontend:
-      host: "*"
-    backend:
-      host: backend-service
-  destinationRules:
-    frontend:
-      host: frontend-service
-    backend:
-      host: backend-service
