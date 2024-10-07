@@ -1,14 +1,23 @@
+{{- if not .Values.backend.versions }}
+{{- fail "At least one backend version must be specified in .Values.backend.versions" }}
+{{- end }}
+{{- $root := . }}
+{{- range .Values.backend.versions }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: frontend-service-{{ . }}
   labels: 
     app: frontend
+    version: {{ . }}
 spec:
-  type: {{ .Values.frontend.service.type }}
+  type: {{ $root.Values.frontend.service.type }}
   selector:
     app: frontend
+    version: {{ . }}
   ports:
     - protocol: TCP
-      port: {{ .Values.frontend.port }}
-      targetPort: {{ .Values.frontend.port }}
+      port: {{ $root.Values.frontend.port }}
+      targetPort: {{ $root.Values.frontend.port }}
+{{- end }}

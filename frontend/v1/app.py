@@ -7,7 +7,7 @@ app = Flask(__name__)
 def index():
     # Fetch data from the backend API
     try:
-        response = requests.get('http://backend-service:5000/api/hello')
+        response = requests.get('http://backend-service-v1:5000/api/hello')
         data = response.json()
         message = data.get('message', 'No message from backend')
         database_url = data.get('database_url', 'Not available')

@@ -1,24 +1,34 @@
+{{- if not .Values.backend.versions }}
+{{- fail "At least one backend version must be specified in .Values.backend.versions" }}
+{{- end }}
+{{- $root := . }}
+{{- range .Values.backend.versions }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: frontend-deployment-{{ . }}
 spec:
-  replicas: {{ index .Values.environments .Values.global.environment "replicaCount" }} 
+  replicas: {{ index $root.Values.environments $root.Values.global.environment "replicaCount" }} 
   selector:
     matchLabels:
       app: frontend
+      version: {{ . }}
   template:
     metadata:
       labels:
         app: frontend
+        version: {{ . }}
     spec:
       containers:
       - name: frontend
-        image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+        image: {{ $root.Values.frontend.image.repository }}:{{ $root.Values.frontend.image.tag }}
         ports:
-        - name : {{ .Values.frontend.portname }} 
-          containerPort: {{ .Values.frontend.port }}
-        resources: {{- toYaml (index .Values.environments .Values.global.environment "resources") | nindent 12 }}
+        - name : {{ $root.Values.frontend.portname }} 
+          containerPort: {{ $root.Values.frontend.port }}
+        resources: {{- toYaml (index $root.Values.environments $root.Values.global.environment "resources") | nindent 12 }}
         envFrom: 
           - configMapRef:
               name: app-config
+{{- end }}
+

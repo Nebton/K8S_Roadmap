@@ -2,18 +2,24 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: flask-app-main
-  namespace: dev 
+  namespace: dev
+  annotations: 
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
 spec:
   ingressClassName: nginx
+  tls: 
+  - hosts: 
+      - minikube.10.98.18.58.nip.io
+    secretName: flask-app-tls
   rules:
-  - host: flask-app.local
-    http:
+  - http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: frontend-service
+            name: frontend-service-v1
             port: 
               number: 5050
       - path: /api
@@ -37,27 +43,31 @@ spec:
             name: backend-service-v1
             port: 
               number: 5000
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: flask-app-canary
-  namespace: dev 
+  namespace: dev
   annotations:
     nginx.ingress.kubernetes.io/canary: "true"
     nginx.ingress.kubernetes.io/canary-weight: "50"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
 spec:
   ingressClassName: nginx
+  tls: 
+  - hosts: 
+     - minikube.10.98.18.58.nip.io
+    secretName: flask-app-tls
   rules:
-  - host: flask-app.local
-    http:
+  - http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: frontend-service
+            name: frontend-service-v2
             port: 
               number: 5050
       - path: /api
@@ -81,4 +91,3 @@ spec:
             name: backend-service-v2
             port: 
                 number: 5000
-

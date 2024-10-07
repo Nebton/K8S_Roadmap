@@ -16,6 +16,7 @@ metadata:
     version: {{ . }}
 spec:
   selector:
+    app: backend
     version: {{ . }}
   ports:
     - name: {{ $root.Values.backend.portname }}
