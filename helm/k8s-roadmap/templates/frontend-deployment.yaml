@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: {{ $root.Values.frontend.image.repository }}:{{ $root.Values.frontend.image.tag }}
+        image: {{ $root.Values.frontend.image.repository }}:{{ $root.Values.frontend.image.tag }}-{{ . }}
         ports:
         - name : {{ $root.Values.frontend.portname }} 
           containerPort: {{ $root.Values.frontend.port }}

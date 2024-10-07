@@ -38,7 +38,7 @@ backend:
     name: backend-service
   image:
     repository: nebton544/k8s_roadmap
-    tag: backend-6aa43b259e50a051433ab35e58ab3013025d8355 
+    tag: backend-3f6f6a0ef5d95ee46035731a4830a9188b5dabe0
   replicaCount: 1
   port: 5000
   portname: http
@@ -56,7 +56,7 @@ frontend:
     name: frontend-service
   image:
     repository: nebton544/k8s_roadmap
-    tag: frontend-6aa43b259e50a051433ab35e58ab3013025d8355
+    tag: frontend-3f6f6a0ef5d95ee46035731a4830a9188b5dabe0
   replicaCount: 1
   port: 5050
   portname: http
