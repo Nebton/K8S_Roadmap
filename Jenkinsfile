@@ -44,7 +44,8 @@ pipeline {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1 ./backend/v1'
                 sh 'docker build -t $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2 ./backend/v2'
-                sh 'docker build -t $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT ./frontend'
+                sh 'docker build -t $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT-v1 ./frontend/v1'
+                sh 'docker build -t $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT-v2 ./frontend/v2'
             }
         }
         
@@ -54,7 +55,8 @@ pipeline {
                     sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                     sh 'docker push $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1'
                     sh 'docker push $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2'
-                    sh 'docker push $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT'
+                    sh 'docker push $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT-v1'
+                    sh 'docker push $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT-v2'
                 }
             }
         }
