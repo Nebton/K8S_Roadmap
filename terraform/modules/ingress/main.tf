@@ -1,18 +1,36 @@
 terraform {
   required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.0"
+    }
     kubectl = {
       source  = "gavinbunney/kubectl"
-      version = "~> 1.14.0"  
+      version = "~> 1.14"
     }
   }
 }
 
-data "http" "nginx_ingress_manifest" {
-  url = "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml"
+
+resource "kubernetes_namespace" "ingress_nginx" {
+  metadata {
+    name = "ingress-nginx"
+  }
 }
 
-resource "kubectl_manifest" "nginx_ingress" {
-  yaml_body = data.http.nginx_ingress_manifest.body
+resource "helm_release" "ingress_nginx" {
+  name       = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
+
+  values = [
+    file("${var.config_path}/values.yaml")
+  ]
 }
 
 resource "kubernetes_secret" "flask_app_tls" {
