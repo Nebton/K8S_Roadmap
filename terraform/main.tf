@@ -35,6 +35,12 @@ module "kubernetes_resources" {
   config_path = "${path.root}/../kubernetes/config/${var.environment}-config.yaml"
 }
 
+module "ingress" {
+  source      = "./modules/ingress"
+  environment = var.environment
+  config_path = "${path.root}/../kubernetes/ingress-nginx"
+}
+
 # module "istio" {
 #   source      = "./modules/istio"
 #   environment = "istio-system"
