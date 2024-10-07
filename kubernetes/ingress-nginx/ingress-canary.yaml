@@ -4,16 +4,23 @@ metadata:
   name: flask-app-main
   namespace: dev
   annotations: 
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/hsts: "true"
+    nginx.ingress.kubernetes.io/hsts-max-age: "31536000"
+    nginx.ingress.kubernetes.io/hsts-include-subdomains: "true"
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-rpm: "100"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
 spec:
   ingressClassName: nginx
   tls: 
   - hosts: 
-      - minikube.10.98.18.58.nip.io
+      - flask-app.com
     secretName: flask-app-tls
   rules:
-  - http:
+  - host: flask-app.com
+    http:
       paths:
       - path: /
         pathType: Prefix
@@ -52,16 +59,24 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/canary: "true"
     nginx.ingress.kubernetes.io/canary-weight: "50"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/hsts: "true"
+    nginx.ingress.kubernetes.io/hsts-max-age: "31536000"
+    nginx.ingress.kubernetes.io/hsts-include-subdomains: "true"
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-rpm: "100"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+
 spec:
   ingressClassName: nginx
   tls: 
   - hosts: 
-     - minikube.10.98.18.58.nip.io
+     - flask-app.com
     secretName: flask-app-tls
   rules:
-  - http:
+  - host: flask-app.com
+    http:
       paths:
       - path: /
         pathType: Prefix
