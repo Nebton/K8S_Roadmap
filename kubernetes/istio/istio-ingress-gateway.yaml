@@ -2,14 +2,14 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: istio-ingress-gateway
-  namespace: prod 
+  namespace: istio-system 
 spec:
   selector:
-    istio: ingressgateway
+    istio: ingress
   servers:
   - port:
       number: 80
-      name: http
+      name: http-istio-gateway
       protocol: HTTP
     hosts:
-    - "flask-app.com"
+    - "*"
