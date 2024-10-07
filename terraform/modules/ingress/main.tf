@@ -31,6 +31,7 @@ resource "helm_release" "ingress_nginx" {
   values = [
     file("${var.config_path}/values.yaml")
   ]
+  depends_on = [kubernetes_namespace.ingress_nginx]
 }
 
 resource "kubernetes_secret" "flask_app_tls" {
@@ -45,6 +46,7 @@ resource "kubernetes_secret" "flask_app_tls" {
     "tls.crt" = file("${var.config_path}/flask-app.com.pem")
     "tls.key" = file("${var.config_path}/flask-app.com-key.pem")
   }
+  depends_on = [helm_release.ingress_nginx]
 }
 
 data "kubectl_file_documents" "ingress_yaml" {
