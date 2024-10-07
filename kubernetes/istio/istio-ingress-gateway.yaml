@@ -9,7 +9,18 @@ spec:
   servers:
   - port:
       number: 80
-      name: http-istio-gateway
+      name: http
       protocol: HTTP
     hosts:
     - "*"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "*"
+    tls:
+      mode: SIMPLE
+      credentialName: flask-app-tls 
