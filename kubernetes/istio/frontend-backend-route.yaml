@@ -6,7 +6,7 @@ spec:
   gateways:
   - istio-system/istio-ingress-gateway
   hosts:
-  - 'flask-app.com'
+  - flask-app.com
   http:
   - match:
     - uri:

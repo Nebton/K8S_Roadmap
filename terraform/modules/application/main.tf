@@ -68,17 +68,4 @@ resource "helm_release" "k8s_roadmap" {
   }
 
 }
-# Virtual service to control traffic between v1 and v2
-resource "kubectl_manifest" "frontend_backend_route" {
-  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", {})
-  depends_on = [helm_release.k8s_roadmap]
-  override_namespace = var.environment
-}
-
-# Destination rule to label v1 and v2 subsets
-resource "kubectl_manifest" "split_traffic" {
-  yaml_body  =  templatefile( "${var.config_path}/split-traffic.yaml", {})
-  depends_on = [kubectl_manifest.frontend_backend_route]
-  override_namespace = var.environment
-}
 

@@ -7,7 +7,6 @@ terraform {
   }
 }
 
-# Application Namespace
 resource "kubernetes_namespace" "app_namespace" {
   metadata {
     name = var.environment 
@@ -63,7 +62,7 @@ resource "helm_release" "istio_ingress" {
   namespace  = var.environment
   timeout    = 300
   depends_on = [helm_release.istiod]
-  wait       = false
+  wait       = true 
 
   values = [
     yamlencode({
@@ -127,8 +126,6 @@ resource "kubectl_manifest" "istio_ingress_gateway" {
   depends_on = [kubernetes_secret.flask_app_tls]
 }
 
-
-
 resource "kubectl_manifest" "backend_round_robin" {
   yaml_body  =  templatefile( "${var.config_path}/backend-destination.yaml", {})
   depends_on = [kubectl_manifest.istio_ingress_gateway]
@@ -141,5 +138,17 @@ resource "kubectl_manifest" "mtls_policy" {
   override_namespace = var.environment
 }
 
+# Virtual service to control traffic between v1 and v2
+resource "kubectl_manifest" "frontend_backend_route" {
+  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", {})
+  depends_on = [kubernetes_secret.flask_app_tls]
+  override_namespace = var.environment
+}
 
+# Destination rule to label v1 and v2 subsets
+resource "kubectl_manifest" "split_traffic" {
+  yaml_body  =  templatefile( "${var.config_path}/split-traffic.yaml", {})
+  depends_on = [kubernetes_secret.flask_app_tls]
+  override_namespace = var.environment
+}
 
