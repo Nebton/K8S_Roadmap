@@ -142,13 +142,13 @@ resource "kubectl_manifest" "mtls_policy" {
 resource "kubectl_manifest" "frontend_backend_route" {
   yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", {})
   depends_on = [kubernetes_secret.flask_app_tls]
-  override_namespace = var.environment
+  override_namespace = var.injected_namespace
 }
 
 # Destination rule to label v1 and v2 subsets
 resource "kubectl_manifest" "split_traffic" {
   yaml_body  =  templatefile( "${var.config_path}/split-traffic.yaml", {})
   depends_on = [kubernetes_secret.flask_app_tls]
-  override_namespace = var.environment
+  override_namespace = var.injected_namespace
 }
 
