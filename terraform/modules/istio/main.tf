@@ -68,7 +68,7 @@ resource "helm_release" "istio_ingress" {
   values = [
     yamlencode({
       service = {
-        type = "NodePort"
+        type = "LoadBalancer"
         ports = [
           {
             name       = "status-port"
@@ -108,9 +108,23 @@ resource "helm_release" "istio_ingress" {
     })
   ]
 }
+
+resource "kubernetes_secret" "flask_app_tls" {
+  metadata {
+    name      = "flask-app-tls"
+    namespace = var.environment
+  }
+  type = "kubernetes.io/tls"
+  data = {
+    "tls.crt" = file("${var.config_path}/flask-app.com.pem")
+    "tls.key" = file("${var.config_path}/flask-app.com-key.pem")
+  }
+  depends_on = [helm_release.istio_ingress]
+}
+
 resource "kubectl_manifest" "istio_ingress_gateway" {
   yaml_body  =  templatefile( "${var.config_path}/istio-ingress-gateway.yaml", { namespace = var.environment })
-  depends_on = [helm_release.istio_ingress]
+  depends_on = [kubernetes_secret.flask_app_tls]
 }
 
 

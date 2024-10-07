@@ -6,13 +6,15 @@ spec:
   gateways:
   - istio-system/istio-ingress-gateway
   hosts:
-  - '*'
+  - 'flask-app.com'
   http:
   - match:
     - uri:
-        exact: /api/hello
+        prefix: /api
     - uri:
         exact: /error
+    - uri:
+        exact: /metrics
     route:
     - destination:
         host: backend-service

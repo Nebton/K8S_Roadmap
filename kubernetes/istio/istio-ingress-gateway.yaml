@@ -2,14 +2,25 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: istio-ingress-gateway
-  namespace: ${namespace} 
+  namespace: ${namespace}
 spec:
   selector:
-    app: istio-ingress
+    istio: ingressgateway
   servers:
   - port:
       number: 80
       name: http
       protocol: HTTP
     hosts:
-    - "*"
+    - "flask-app.com"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "flask-app.com"
+    tls:
+      mode: SIMPLE
+      credentialName: flask-app-tls 
