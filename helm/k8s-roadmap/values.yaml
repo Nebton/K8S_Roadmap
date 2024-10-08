@@ -36,9 +36,10 @@ backend:
     - v2
   service:
     name: backend-service
+    accountName: backend-sa
   image:
     repository: nebton544/k8s_roadmap
-    tag: backend-latest
+    tag: backend-c61d6fde0bd40c2f42196fa6637a02834ae12566
   replicaCount: 1
   port: 5000
   metricsPort: 5005
@@ -52,18 +53,19 @@ backend:
   annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
-        prometheus.io/port: "5000"
+        prometheus.io/port: "5005"
 frontend:
   service:
     name: frontend-service
+    accountName: frontend-sa
+    type: ClusterIP
   image:
     repository: nebton544/k8s_roadmap
-    tag: frontend-latest
+    tag: frontend-c61d6fde0bd40c2f42196fa6637a02834ae12566
   replicaCount: 1
   port: 5050
   portname: http
-  service:
-    type: ClusterIP # Used to be NodePort. Cluster IP is for Istio to handle external access  
+
 
 istio:
   enabled: true

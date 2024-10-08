@@ -1,0 +1,23 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: monitor-allow-policy
+  namespace: istio-system 
+spec:
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        namespaces: ["monitoring"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-from-prod
+  namespace: istio-system
+spec:
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        namespaces: ["prod"]

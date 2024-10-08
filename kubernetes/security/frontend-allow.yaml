@@ -1,0 +1,48 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: frontend-auth-policy
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        namespaces: ["prod"]  
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: 
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-ingress-to-apps
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingress
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        paths: ["/*"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: enable-access
+  namespace: prod 
+spec:
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        namespaces: ["istio-system"]
+    to:
+    - operation:
+        methods: ["GET"]

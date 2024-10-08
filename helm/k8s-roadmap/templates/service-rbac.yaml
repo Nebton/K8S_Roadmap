@@ -1,0 +1,65 @@
+## Two regular SA and one Admin
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backend-sa
+  namespace: prod
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend-sa
+  namespace: prod
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-sa
+  namespace: prod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: prod
+  name: backend-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: backend-role-binding
+  namespace: prod
+subjects:
+- kind: ServiceAccount
+  name: backend-sa
+  namespace: prod
+roleRef:
+  kind: Role
+  name: backend-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: admin-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-role-binding
+subjects:
+- kind: ServiceAccount
+  name: admin-sa
+  namespace: prod
+roleRef:
+  kind: ClusterRole
+  name: admin-role
+  apiGroup: rbac.authorization.k8s.io

@@ -21,6 +21,7 @@ spec:
         version: {{ . }}
       annotations: {{- toYaml $root.Values.backend.annotations | nindent 8 }}
     spec:
+      serviceAccountName: {{ $root.Values.backend.service.accountName }}
       containers:
       - name: backend-{{ . }}
         image: {{ $root.Values.backend.image.repository }}:{{ $root.Values.backend.image.tag }}-{{ . }}
