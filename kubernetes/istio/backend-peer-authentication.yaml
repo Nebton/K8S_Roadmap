@@ -1,0 +1,13 @@
+## This is to allow plain-text traffic into and from the backend Metrics port, notably for the flask app service monitor running on the monitoring namespace which is NOT istio injected (too much overhead)
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: backend-peer-authentication
+  namespace: prod
+spec:
+  selector:
+    matchLabels:
+      app: backend  
+  portLevelMtls:
+    5005:
+      mode: PERMISSIVE
