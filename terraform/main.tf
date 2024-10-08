@@ -62,14 +62,15 @@ module "application" {
 module "monitoring" {
   source      = "./modules/monitoring"
   environment = "monitoring" 
+  monitored_namespace = var.environment
   config_path = "${path.root}/../kubernetes/monitoring"
   depends_on  = [module.kubernetes_resources]
 }
 
-module "logging" {
-  source      = "./modules/logging"
-  environment = "logging" 
-  config_path = "${path.root}/../kubernetes/logging"
-  depends_on  = [module.kubernetes_resources]
-}
+# module "logging" {
+#   source      = "./modules/logging"
+#   environment = "logging" 
+#   config_path = "${path.root}/../kubernetes/logging"
+#   depends_on  = [module.kubernetes_resources]
+# }
 

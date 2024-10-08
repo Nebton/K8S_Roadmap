@@ -15,3 +15,7 @@ spec:
       protocol: TCP
       port: {{ .Values.backend.port }}
       targetPort: {{ .Values.backend.port }}
+    - name: {{ .Values.backend.metricsPortName }}
+      protocol: TCP
+      port: {{ .Values.backend.metricsPort }}
+      targetPort: {{ .Values.backend.metricsPort }}

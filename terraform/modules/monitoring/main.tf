@@ -52,7 +52,7 @@ resource "kubectl_manifest" "node_exporter_service" {
 }
 
 resource "kubectl_manifest" "flask-app-monitor" {
-  yaml_body =  templatefile( "${var.config_path}/flask-app-monitor.yaml", {namespace = var.environment})
+  yaml_body =  templatefile( "${var.config_path}/flask-app-monitor.yaml", {namespace = var.monitored_namespace})
   depends_on = [helm_release.prometheus]
 }
 

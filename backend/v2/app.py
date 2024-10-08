@@ -5,10 +5,11 @@ import time
 import random
 from prometheus_client import Counter, Histogram, generate_latest, REGISTRY, Summary
 from prometheus_client.exposition import CONTENT_TYPE_LATEST
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
-from prometheus_client import make_wsgi_app
+from multiprocessing import Process
 
 app = Flask(__name__)
+metrics_app = Flask(__name__)
+
 # Configure caching
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
@@ -71,7 +72,7 @@ def get_status():
         "database_connection": "active"
     })
 
-@app.route('/metrics')
+@metrics_app.route('/metrics')
 def metrics():
     return Response(generate_latest(REGISTRY), mimetype=CONTENT_TYPE_LATEST)
 
@@ -100,9 +101,18 @@ def before_request():
     else:
         CACHE_MISSES.inc()
 
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/metrics': make_wsgi_app()
-})
+def run_app():
+    app.run(host='0.0.0.0', port=5000)
+
+def run_metrics():
+    metrics_app.run(host='0.0.0.0', port=5005)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app_process = Process(target=run_app)
+    metrics_process = Process(target=run_metrics)
+    
+    app_process.start()
+    metrics_process.start()
+    
+    app_process.join()
+    metrics_process.join()

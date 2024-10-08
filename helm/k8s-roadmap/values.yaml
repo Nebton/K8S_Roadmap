@@ -41,7 +41,9 @@ backend:
     tag: backend-latest
   replicaCount: 1
   port: 5000
+  metricsPort: 5005
   portname: http
+  metricsPortName: metrics
   autoscaling:
     enabled: true
     minReplicas: 1

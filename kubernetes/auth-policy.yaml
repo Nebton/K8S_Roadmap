@@ -1,0 +1,32 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: metrics-access
+  namespace: prod  
+spec:
+  selector:
+    matchLabels:
+      app: backend-service 
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        paths: ["/metrics"]
+        methods: ["GET"]
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: backend-metrics-plaintext
+  namespace: prod  
+spec:
+  host: backend-service 
+  trafficPolicy:
+    portLevelSettings:
+    - port:
+        number: 5000  
+      tls:
+        mode: DISABLE
+      loadBalancer:
+        simple: ROUND_ROBIN
+

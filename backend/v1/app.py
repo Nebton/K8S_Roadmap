@@ -2,19 +2,20 @@ from flask import Flask, jsonify, Response
 import os
 from prometheus_client import Counter, Histogram, generate_latest, REGISTRY
 from prometheus_client.exposition import CONTENT_TYPE_LATEST
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
-from prometheus_client import make_wsgi_app
-from prometheus_client import Counter
+from multiprocessing import Process
+
 # Fetch environment variables
 database_url = os.getenv('DATABASE_URL')
 api_url = os.getenv('API_URL')
 log_level = os.getenv('LOG_LEVEL')
 
 app = Flask(__name__)
+metrics_app = Flask(__name__)
 
-# Step 3: Create custom metrics
+# Create custom metrics
 REQUESTS = Counter('hello_requests_total', 'Total number of requests to /api/hello')
 RESPONSE_TIME = Histogram('hello_response_time_seconds', 'Response time of /api/hello')
+ERROR_COUNTER = Counter('http_errors_total', 'Total number of HTTP errors', ['status'])
 
 @app.route('/api/hello')
 @RESPONSE_TIME.time()
@@ -28,12 +29,9 @@ def hello():
         log_level=log_level
     )
 
-# Step 2: Expose a /metrics endpoint
-@app.route('/metrics')
+@metrics_app.route('/metrics')
 def metrics():
     return Response(generate_latest(REGISTRY), mimetype=CONTENT_TYPE_LATEST)
-
-ERROR_COUNTER = Counter('http_errors_total', 'Total number of HTTP errors', ['status'])
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -46,12 +44,21 @@ def internal_server_error(e):
     return jsonify(error=str(e)), 500
 
 @app.route('/error')
-def error() :
+def error():
     1 / 0
 
-# Add prometheus wsgi middleware to route /metrics requests
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/metrics': make_wsgi_app()
-})
-if __name__ == '__main__':
+def run_app():
     app.run(host='0.0.0.0', port=5000)
+
+def run_metrics():
+    metrics_app.run(host='0.0.0.0', port=5005)
+
+if __name__ == '__main__':
+    app_process = Process(target=run_app)
+    metrics_process = Process(target=run_metrics)
+    
+    app_process.start()
+    metrics_process.start()
+    
+    app_process.join()
+    metrics_process.join()

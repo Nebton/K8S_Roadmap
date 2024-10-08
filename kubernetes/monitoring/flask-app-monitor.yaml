@@ -2,7 +2,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: flask-app-monitor
-  # namespace: monitoring
   namespace: monitoring
   annotations:
     sidecar.istio.io/inject: "true"
@@ -12,12 +11,11 @@ spec:
   jobLabel: app
   namespaceSelector:
     matchNames:
-      # - ${namespace}
-      - dev
+       - ${namespace}
   selector:
     matchLabels:
       app: backend
   endpoints:
-  - port: http
+  - port: metrics
     path: /metrics
     interval: 15s
