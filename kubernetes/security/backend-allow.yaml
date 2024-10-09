@@ -1,8 +1,23 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: backend-auth-policy
-  namespace: istio-system
+  name: allow-backend-metrics
+  namespace: prod 
+spec:
+  selector:
+    matchLabels:
+      app: backend 
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        paths: ["/metrics*"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-front-back 
+  namespace: prod 
 spec:
   selector:
     matchLabels:
@@ -15,4 +30,4 @@ spec:
     to:
     - operation:
         methods: ["GET", "POST"]
-        paths: ["/api/*"]
+        paths: ["/*"]

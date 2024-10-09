@@ -1,7 +1,7 @@
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
-  name: allow-nothing
+  name: deny-all 
   namespace: istio-system
 spec:
   action: ALLOW
