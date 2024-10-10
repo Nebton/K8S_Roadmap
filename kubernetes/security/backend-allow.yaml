@@ -12,22 +12,4 @@ spec:
   - to:
     - operation:
         paths: ["/metrics*"]
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: allow-front-back 
-  namespace: prod 
-spec:
-  selector:
-    matchLabels:
-      app: backend
-  action: ALLOW
-  rules:
-  - from:
-    - source:
-        principals: ["cluster.local/ns/prod/sa/frontend-sa"]
-    to:
-    - operation:
-        methods: ["GET", "POST"]
-        paths: ["/*"]
+

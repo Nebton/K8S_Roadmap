@@ -189,3 +189,9 @@ resource "kubectl_manifest" "allow_admin_full_access" {
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
+
+resource "kubectl_manifest" "allow_front_back_communication" {
+  yaml_body  =  templatefile( "${var.config_path}/../security/front-back.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.injected_namespace
+}
