@@ -163,17 +163,29 @@ resource "kubectl_manifest" "backend_peer_authentication" {
 resource "kubectl_manifest" "default_deny_policy" {
   yaml_body  =  templatefile( "${var.config_path}/../security/default-deny.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
-  override_namespace = var.injected_namespace
+  override_namespace = var.environment
 }
 
-resource "kubectl_manifest" "allow_traffic_to_frontend" {
-  yaml_body  =  templatefile( "${var.config_path}/../security/frontend-allow.yaml", {})
+resource "kubectl_manifest" "allow_ingress" {
+  yaml_body  =  templatefile( "${var.config_path}/../security/allow-ingress.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
 
+resource "kubectl_manifest" "allow_ingress_to_apps" {
+  yaml_body  =  templatefile( "${var.config_path}/../security/allow-ingress-apps.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.environment
+}
+
 resource "kubectl_manifest" "allow_traffic_to_backend" {
   yaml_body  =  templatefile( "${var.config_path}/../security/backend-allow.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "allow_admin_full_access" {
+  yaml_body  =  templatefile( "${var.config_path}/../security/admin-allow.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
