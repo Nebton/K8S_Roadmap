@@ -1,1 +1,2 @@
 *.terraform*
+vault/vault_keys.json
