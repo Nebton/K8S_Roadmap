@@ -4,64 +4,85 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.7"
+    }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 3.0"
+    }
   }
 }
 
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"  # adjust this path if your kubeconfig is elsewhere
+  }
+}
 
-# Null provider for local-exec provisioners
-provider "null" {}
+provider "kubernetes" {
+  config_path = "~/.kube/config"  # adjust this path if your kubeconfig is elsewhere
+}
 
-# External provider for running external commands
-provider "external" {}
-
-# Time provider for introducing delays
-provider "time" {}
-
-
+resource "kubernetes_namespace" "vault" {
+  metadata {
+    name = "vault"
+  }
+}
 
 resource "helm_release" "vault" {
   name             = "vault"
   repository       = "https://helm.releases.hashicorp.com"
   chart            = "vault"
-  namespace        = "vault"
-  create_namespace = true
+  namespace        = kubernetes_namespace.vault.metadata[0].name
+  create_namespace = false
   version          = "0.28.1"  
 
   values = [
-      <<-EOT
-      server:
-        dev:
-          enabled: false
-        ha:
-          enabled: true
-        standalone:
-          config: |
-            ui = true
-            listener "tcp" {
-              tls_disable = 1
-              address = "[::]:8200"
-              cluster_address = "[::]:8201"
-            }
-            storage "file" {
-              path = "/vault/data"
-            }
-      EOT
-    ]
+    <<-EOT
+    server:
+      dev:
+        enabled: false
+      ha:
+        enabled: true
+      standalone:
+        config: |
+          ui = true
+          listener "tcp" {
+            tls_disable = 1
+            address = "[::]:8200"
+            cluster_address = "[::]:8201"
+          }
+          storage "file" {
+            path = "/vault/data"
+          }
+    EOT
+  ]
 }
 
-# Wait for Vault to be ready
 resource "time_sleep" "wait_for_vault" {
   depends_on = [helm_release.vault]
   create_duration = "30s"
 }
 
-# Initialize Vault with 5 key shares and 3 threshold
 data "external" "vault_init" {
   depends_on = [time_sleep.wait_for_vault]
   program = ["sh", "-c", "kubectl exec -n ${kubernetes_namespace.vault.metadata[0].name} vault-0 -- vault operator init -format=json -n 5 -t 3"]
 }
 
-# Unseal Vault using 3 of the 5 keys
 resource "null_resource" "vault_unseal" {
   depends_on = [data.external.vault_init]
 
@@ -74,13 +95,11 @@ resource "null_resource" "vault_unseal" {
   }
 }
 
-# Configure Vault provider
 provider "vault" {
   address = "http://127.0.0.1:8200"  
   token   = data.external.vault_init.result.root_token
 }
 
-# Enable KV secrets engine
 resource "vault_mount" "kv" {
   depends_on = [null_resource.vault_unseal]
   path       = "secret"
@@ -88,14 +107,11 @@ resource "vault_mount" "kv" {
   options    = { version = "2" }
 }
 
-# Enable database secrets engine
 resource "vault_mount" "db" {
   depends_on = [null_resource.vault_unseal]
   path       = "database"
   type       = "database"
-}
-
-# # Configure PostgreSQL connection
+}# # Configure PostgreSQL connection
 # resource "vault_database_secret_backend_connection" "postgres" {
 #   backend       = vault_mount.db.path
 #   name          = "postgres"
