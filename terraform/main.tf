@@ -69,7 +69,7 @@ module "application" {
 module "vault" {
   source      = "./modules/vault"
   environment = "vault" 
-  monitored_namespace = var.environment
+  app_namespace = var.environment
   config_path = "${path.root}/../vault"
   depends_on  = [module.kubernetes_resources]
 }
