@@ -61,11 +61,12 @@ resource "helm_release" "vault" {
           }
     EOT
   ]
+ depends_on = [kubernetes_namespace.vault]
 }
 
 resource "time_sleep" "wait_for_vault" {
   depends_on = [helm_release.vault]
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 data "external" "vault_init" {
