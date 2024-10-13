@@ -80,7 +80,7 @@ resource "time_sleep" "wait_for_vault" {
 
 data "external" "vault_init" {
   depends_on = [time_sleep.wait_for_vault]
-  program = ["sh", "-c", "kubectl exec -n ${kubernetes_namespace.vault.metadata[0].name} vault-0 -- vault operator init -format=json -n 5 -t 3"]
+  program = ["sh", "-c", "kubectl exec -n ${kubernetes_namespace.vault.metadata[0].name} vault-0 -- vault operator init -format=json -n 5 -t 3 -format json"]
 }
 
 resource "null_resource" "vault_unseal" {
