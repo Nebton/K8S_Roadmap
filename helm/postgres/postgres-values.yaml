@@ -1,0 +1,21 @@
+postgresqlDatabase: flask-app
+postgresqlUsername: postgres
+postgresqlPassword: P@55w0rd 
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+metrics:
+  enabled: false
+
+networkPolicy:
+  enabled: false

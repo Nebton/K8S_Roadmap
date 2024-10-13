@@ -1,0 +1,12 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: disable-postgres-mtls
+  namespace: prod
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+  portLevelMtls:
+    5432:
+      mode: PERMISSIVE

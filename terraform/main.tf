@@ -35,13 +35,13 @@ module "kubernetes_resources" {
   config_path = "${path.root}/../kubernetes/config/${var.environment}-config.yaml"
 }
 
-module "istio" {
-  source      = "./modules/istio"
-  environment = "istio-system"
-  injected_namespace = var.environment
-  config_path = "${path.root}/../kubernetes/istio"
-  depends_on  = [module.kubernetes_resources]
-}
+# module "istio" {
+#   source      = "./modules/istio"
+#   environment = "istio-system"
+#   injected_namespace = var.environment
+#   config_path = "${path.root}/../kubernetes/istio"
+#   depends_on  = [module.kubernetes_resources]
+# }
 
 module "application" {
   source         = "./modules/application"
@@ -52,18 +52,32 @@ module "application" {
   backend_versions = var.backend_versions
   frontend_image = var.frontend_image
   helm_chart_path = "${path.root}/../helm/k8s-roadmap"
-  depends_on     = [module.istio]
+  depends_on  = [module.kubernetes_resources]  
   backend_autoscaling_min_replicas = var.backend_autoscaling_min_replicas
   backend_autoscaling_max_replicas = var.backend_autoscaling_max_replicas
   backend_autoscaling_cpu_threshold = var.backend_autoscaling_cpu_threshold
-
 }
 
-module "monitoring" {
-  source      = "./modules/monitoring"
-  environment = "monitoring" 
+# module "monitoring" {
+#   source      = "./modules/monitoring"
+#   environment = "monitoring" 
+#   monitored_namespace = var.environment
+#   config_path = "${path.root}/../kubernetes/monitoring"
+#   depends_on  = [module.kubernetes_resources]
+# }
+
+module "vault" {
+  source      = "./modules/vault"
+  environment = "vault" 
   monitored_namespace = var.environment
-  config_path = "${path.root}/../kubernetes/monitoring"
+  config_path = "${path.root}/../vault"
+  depends_on  = [module.kubernetes_resources]
+}
+
+module "postgres" {
+  source      = "./modules/postgres"
+  environment = var.environment 
+  config_path = "${path.root}/../helm/postgres"
   depends_on  = [module.kubernetes_resources]
 }
 

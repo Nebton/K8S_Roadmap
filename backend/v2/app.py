@@ -6,6 +6,10 @@ import random
 from prometheus_client import Counter, Histogram, generate_latest, REGISTRY, Summary
 from prometheus_client.exposition import CONTENT_TYPE_LATEST
 from multiprocessing import Process
+import hvac
+from hvac.api.auth_methods import Kubernetes
+import psycopg2
+
 
 app = Flask(__name__)
 metrics_app = Flask(__name__)
@@ -25,6 +29,43 @@ ERROR_COUNTER = Counter('http_errors_total', 'Total number of HTTP errors', ['st
 PROCESS_TIME = Summary('process_time_seconds', 'Time spent processing request')
 CACHE_HITS = Counter('cache_hits_total', 'Total number of cache hits')
 CACHE_MISSES = Counter('cache_misses_total', 'Total number of cache misses')
+
+def get_db_connection():
+    client = hvac.Client(url="http://vault.vault.svc.cluster.local:8200")
+
+    with open("/var/run/secrets/kubernetes.io/serviceaccount/token",'r') as f :
+        jwt = f.read()
+    try : 
+        Kubernetes(client.adapter).login(role="backend",jwt=jwt)
+    except Exception as e: 
+        print(f"Exception {e} occured for token {jwt}")
+ 
+# Request dynamic credentials for the database
+    response = client.secrets.database.generate_credentials(name="readonly")
+    
+    # Extract the credentials
+    username = response['data']['username']
+    password = response['data']['password']
+    
+    # Connect to the database using the dynamic credentials
+    conn = psycopg2.connect(
+        host="postgres-postgresql",
+        database="flaskapp",
+        user=username,
+        password=password
+    )
+    
+    return conn
+
+@app.route('/users')
+def get_users():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users")
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify([{"id": user[0], "username": user[1], "email": user[2]} for user in users])
 
 @app.route('/api/hello')
 @RESPONSE_TIME.time()
