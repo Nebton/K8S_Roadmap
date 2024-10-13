@@ -66,13 +66,13 @@ module "application" {
 #   depends_on  = [module.kubernetes_resources]
 # }
 
-# module "vault" {
-#   source      = "./modules/vault"
-#   environment = "vault" 
-#   app_namespace = var.environment
-#   config_path = "${path.root}/../vault"
-#   depends_on  = [module.kubernetes_resources]
-# }
+module "vault" {
+  source      = "./modules/vault"
+  environment = "vault" 
+  app_namespace = var.environment
+  config_path = "${path.root}/../vault"
+  depends_on  = [module.kubernetes_resources]
+}
 
 module "postgres" {
   source      = "./modules/postgres"
