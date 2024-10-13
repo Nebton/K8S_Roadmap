@@ -27,28 +27,12 @@ terraform {
   }
 }
 
-provider "helm" {
-  kubernetes {
-    config_path = "~/.kube/config"  # adjust this path if your kubeconfig is elsewhere
-  }
-}
-
-provider "kubernetes" {
-  config_path = "~/.kube/config"  # adjust this path if your kubeconfig is elsewhere
-}
-
-resource "kubernetes_namespace" "vault" {
-  metadata {
-    name = "vault"
-  }
-}
-
 resource "helm_release" "vault" {
   name             = "vault"
   repository       = "https://helm.releases.hashicorp.com"
   chart            = "vault"
-  namespace        = kubernetes_namespace.vault.metadata[0].name
-  create_namespace = false
+  namespace        = var.environment
+  create_namespace = true
   version          = "0.28.1"  
 
   values = [
@@ -80,7 +64,12 @@ resource "time_sleep" "wait_for_vault" {
 
 data "external" "vault_init" {
   depends_on = [time_sleep.wait_for_vault]
-  program = ["sh", "-c", "kubectl exec -n ${kubernetes_namespace.vault.metadata[0].name} vault-0 -- vault operator init -format=json -n 5 -t 3 -format json"]
+  program = ["sh", "-c", "kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3 -format json"]
+}
+
+output "debug_vault_init_result" {
+  value = data.external.vault_init.result
+  sensitive = true
 }
 
 resource "null_resource" "vault_unseal" {
@@ -88,9 +77,9 @@ resource "null_resource" "vault_unseal" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      kubectl exec -n ${kubernetes_namespace.vault.metadata[0].name} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[0]} &&
-      kubectl exec -n ${kubernetes_namespace.vault.metadata[0].name} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[1]} &&
-      kubectl exec -n ${kubernetes_namespace.vault.metadata[0].name} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[2]}
+      kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[0]} &&
+      kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[1]} &&
+      kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[2]}
     EOT
   }
 }
