@@ -27,12 +27,18 @@ terraform {
   }
 }
 
+resource "kubernetes_namespace" "vault" {
+  metadata {
+    name = var.environment
+  }
+}
+
 resource "helm_release" "vault" {
   name             = "vault"
   repository       = "https://helm.releases.hashicorp.com"
   chart            = "vault"
   namespace        = var.environment
-  create_namespace = true
+  create_namespace = false
   version          = "0.28.1"  
 
   values = [
