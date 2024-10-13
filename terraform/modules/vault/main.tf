@@ -17,8 +17,6 @@ provider "external" {}
 # Time provider for introducing delays
 provider "time" {}
 
-# Vault provider (will be configured later)
-provider "vault" {}
 
 
 resource "helm_release" "vault" {
@@ -78,7 +76,7 @@ resource "null_resource" "vault_unseal" {
 
 # Configure Vault provider
 provider "vault" {
-  address = "http://127.0.0.1:8200"  # This assumes you're port-forwarding. Adjust if needed.
+  address = "http://127.0.0.1:8200"  
   token   = data.external.vault_init.result.root_token
 }
 
