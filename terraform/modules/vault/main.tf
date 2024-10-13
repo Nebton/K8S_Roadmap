@@ -80,13 +80,9 @@ resource "helm_release" "vault" {
  depends_on = [kubernetes_namespace.vault]
 }
 
-resource "time_sleep" "wait_for_vault" {
-  depends_on = [helm_release.vault]
-  create_duration = "60s"
-}
 
 data "external" "vault_init" {
-  depends_on = [time_sleep.wait_for_vault]
+  depends_on = [helm_release.vault]
   program = ["sh", "-c", "kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3 -format json"]
 }
 
