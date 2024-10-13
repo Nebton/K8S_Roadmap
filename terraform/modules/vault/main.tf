@@ -42,28 +42,6 @@ resource "helm_release" "vault" {
   create_namespace = false
   version          = "0.28.1"  
 
-  values = [
-    <<-EOT
-    server:
-      dev:
-        enabled: false
-      standalone:
-        enabled: true
-        config: |
-          ui = true
-          listener "tcp" {
-            tls_disable = 1
-            address = "[::]:8200"
-            cluster_address = "[::]:8201"
-          }
-          storage "inmem" {}
-      dataStorage:
-        enabled: false
-      auditStorage:
-        enabled: false
-    EOT
-  ]
-
  depends_on = [kubernetes_namespace.vault]
 }
 
