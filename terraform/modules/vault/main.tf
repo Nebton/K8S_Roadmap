@@ -27,21 +27,6 @@ terraform {
   }
 }
 
-# Remove existing Vault installation
-resource "null_resource" "remove_existing_vault" {
-  provisioner "local-exec" {
-    command = <<-EOT
-      kubectl delete --ignore-not-found=true -n ${var.environment} statefulset vault
-      kubectl delete --ignore-not-found=true -n ${var.environment} service vault
-      kubectl delete --ignore-not-found=true -n ${var.environment} service vault-internal
-      kubectl delete --ignore-not-found=true -n ${var.environment} service vault-active
-      kubectl delete --ignore-not-found=true -n ${var.environment} service vault-standby
-      kubectl delete --ignore-not-found=true -n ${var.environment} configmap vault-config
-      kubectl delete --ignore-not-found=true -n ${var.environment} pvc data-vault-0
-      kubectl delete --ignore-not-found=true -n ${var.environment} secret vault-token-keeper-token
-    EOT
-  }
-}
 
 resource "kubernetes_namespace" "vault" {
   metadata {
@@ -62,9 +47,8 @@ resource "helm_release" "vault" {
     server:
       dev:
         enabled: false
-      ha:
-        enabled: true
       standalone:
+        enabled: true
         config: |
           ui = true
           listener "tcp" {
@@ -72,11 +56,14 @@ resource "helm_release" "vault" {
             address = "[::]:8200"
             cluster_address = "[::]:8201"
           }
-          storage "file" {
-            path = "/vault/data"
-          }
+          storage "inmem" {}
+      dataStorage:
+        enabled: false
+      auditStorage:
+        enabled: false
     EOT
   ]
+
  depends_on = [kubernetes_namespace.vault]
 }
 
