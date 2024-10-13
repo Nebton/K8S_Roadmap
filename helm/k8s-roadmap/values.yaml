@@ -38,8 +38,8 @@ backend:
     name: backend-service
     accountName: backend-sa
   image:
-    repository: nebton544/backend-postgres-vault
-    tag: latest 
+    repository: nebton544/k8s_roadmap
+    tag: backend-c61d6fde0bd40c2f42196fa6637a02834ae12566
   replicaCount: 1
   port: 5000
   metricsPort: 5005
@@ -60,8 +60,8 @@ frontend:
     accountName: frontend-sa
     type: ClusterIP
   image:
-    repository: nebton544/frontend-vault 
-    tag: latest 
+    repository: nebton544/k8s_roadmap
+    tag: frontend-c61d6fde0bd40c2f42196fa6637a02834ae12566
   replicaCount: 1
   port: 5050
   portname: http
