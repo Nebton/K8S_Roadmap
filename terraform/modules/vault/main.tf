@@ -98,29 +98,62 @@ resource "kubernetes_secret" "vault_root_token" {
 }
 
 
-# Configure Kubernetes auth method directly on the vault-0 pod
-resource "null_resource" "configure_vault_k8s_auth" {
+# Get Kubernetes configuration details
+resource "null_resource" "get_k8s_config" {
   depends_on = [null_resource.vault_unseal]
 
   provisioner "local-exec" {
     command = <<-EOT
-      KUBE_HOST=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.server}')
-      KUBE_CA_CERT=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.certificate-authority-data}' | base64 --decode)
-      SA_TOKEN=$(kubectl create token vault-auth -n default)
-      
-      echo $KUBE_HOST
-      echo $KUBE_CA_CERT
-      echo $SA_TOKEN
-
-      kubectl exec -n ${var.environment} vault-0 -- /bin/sh -c '
-        vault login ${local.vault_init.root_token}
-        vault auth enable kubernetes
-        vault write auth/kubernetes/config \
-          kubernetes_host="$KUBE_HOST" \
-          kubernetes_ca_cert="$KUBE_CA_CERT" \
-          token_reviewer_jwt="$SA_TOKEN"
-      '
+      kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.server}' > kube_host.txt
+      kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.certificate-authority-data}' | base64 --decode > kube_ca_cert.txt
+      kubectl create token vault-auth -n default > sa_token.txt
     EOT
   }
 }
 
+# Read the Kubernetes configuration details into local variables
+data "local_file" "kube_host" {
+  depends_on = [null_resource.get_k8s_config]
+  filename   = "${path.root}/kube_host.txt"
+}
+
+data "local_file" "kube_ca_cert" {
+  depends_on = [null_resource.get_k8s_config]
+  filename   = "${path.root}/kube_ca_cert.txt"
+}
+
+data "local_file" "sa_token" {
+  depends_on = [null_resource.get_k8s_config]
+  filename   = "${path.root}/sa_token.txt"
+}
+
+# Configure Vault Kubernetes auth
+resource "null_resource" "configure_vault_k8s_auth" {
+  depends_on = [null_resource.get_k8s_config]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Configuring Vault Kubernetes auth..."
+      echo "Kubernetes Host: ${data.local_file.kube_host.content}"
+      kubectl exec -n ${var.environment} vault-0 -- /bin/sh -c "
+        vault login ${local.vault_init.root_token}
+        vault auth enable kubernetes
+        vault write auth/kubernetes/config \
+          kubernetes_host='${data.local_file.kube_host.content}' \
+          kubernetes_ca_cert='${data.local_file.kube_ca_cert.content}' \
+          token_reviewer_jwt='${data.local_file.sa_token.content}'
+      "
+    EOT
+  }
+}
+
+# Clean up temporary files
+resource "null_resource" "cleanup_k8s_config_files" {
+  depends_on = [null_resource.verify_vault_k8s_auth]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      rm -f kube_host.txt kube_ca_cert.txt sa_token.txt
+    EOT
+  }
+}
