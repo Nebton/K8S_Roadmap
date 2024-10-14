@@ -50,6 +50,8 @@ data "external" "vault_init" {
   depends_on = [helm_release.vault]
   program = ["sh", "-c", <<EOT
     set -e
+    echo "Waiting for 1 minute before executing vault init..."
+    sleep 60
     INIT_OUTPUT=$(kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3 2>&1) || {
       echo "{\"error\": \"$(echo $INIT_OUTPUT | jq -Rsc .)\"}"
       exit 0
@@ -57,11 +59,6 @@ data "external" "vault_init" {
     echo "$INIT_OUTPUT"
   EOT
   ]
-}
-
-output "debug_vault_init_result" {
-  value = data.external.vault_init.result
-  sensitive = true
 }
 
 # resource "null_resource" "vault_unseal" {
