@@ -68,11 +68,6 @@ data "local_file" "vault_init" {
   filename   = "${path.root}/vault_init.json"
 }
 
-output "vault_init_contents" {
-  value = jsondecode(data.local_file.vault_init.content)
-  sensitive = true
-}
-
 locals {
   vault_init = jsondecode(data.local_file.vault_init.content)
 }
@@ -102,57 +97,31 @@ resource "kubernetes_secret" "vault_root_token" {
   type = "Opaque"
 }
 
-# resource "null_resource" "vault_unseal" {
-#   depends_on = [data.external.vault_init]
-#
-#   provisioner "local-exec" {
-#     command = <<-EOT
-#       kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[0]} &&
-#       kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[1]} &&
-#       kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${data.external.vault_init.result.unseal_keys_b64[2]}
-#     EOT
-#   }
-# }
-#
-# provider "vault" {
-#   address = "http://127.0.0.1:8200"  
-#   token   = data.external.vault_init.result.root_token
-# }
-#
-# resource "vault_mount" "kv" {
-#   depends_on = [null_resource.vault_unseal]
-#   path       = "secret"
-#   type       = "kv"
-#   options    = { version = "2" }
-# }
-#
-# resource "vault_mount" "db" {
-#   depends_on = [null_resource.vault_unseal]
-#   path       = "database"
-#   type       = "database"
-# }# # Configure PostgreSQL connection
-# # resource "vault_database_secret_backend_connection" "postgres" {
-# #   backend       = vault_mount.db.path
-# #   name          = "postgres"
-# #   allowed_roles = ["flask-app-role"]
-# #
-# #   postgresql {
-# #     connection_url = "postgresql://{{username}}:{{password}}@postgresql.${kubernetes_namespace.postgresql.metadata[0].name}.svc.cluster.local:5432/flaskdb?sslmode=disable"
-# #   }
-# # }
-# #
-# # # Create a role for the database secrets engine
-# # resource "vault_database_secret_backend_role" "flask_app_role" {
-# #   backend     = vault_mount.db.path
-# #   name        = "flask-app-role"
-# #   db_name     = vault_database_secret_backend_connection.postgres.name
-# #   default_ttl = "1h"
-# #   max_ttl     = "24h"
-# #
-# #   creation_statements = [
-# #     "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
-# #     "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";"
-# #   ]
-# # }
-# #
-# #
+provider "vault" {
+  address = "http://vault.${var.environment}:8200"
+  token   = local.vault_init.root_token
+}
+
+
+# Configure Kubernetes auth method directly on the vault-0 pod
+resource "null_resource" "configure_vault_k8s_auth" {
+  depends_on = [null_resource.vault_unseal, kubernetes_service_account.vault_auth]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      KUBE_HOST=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.server}')
+      KUBE_CA_CERT=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.certificate-authority-data}' | base64 --decode)
+      SA_TOKEN=$(kubectl create token vault-auth -n default)
+      
+      kubectl exec -n ${var.environment} vault-0 -- /bin/sh -c '
+        vault login ${local.vault_init.root_token}
+        vault auth enable kubernetes
+        vault write auth/kubernetes/config \
+          kubernetes_host="$KUBE_HOST" \
+          kubernetes_ca_cert="$KUBE_CA_CERT" \
+          token_reviewer_jwt="$SA_TOKEN"
+      '
+    EOT
+  }
+}
+

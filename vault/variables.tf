@@ -9,7 +9,7 @@ variable "config_path" {
   type        = string
 }
 
-variable "monitored_namespace" {
+variable "app_namespace" {
   description = "Environment interacting with Vault(dev, staging, prod)"
   type        = string
   default     = "prod"
