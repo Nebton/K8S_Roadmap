@@ -147,18 +147,6 @@ resource "null_resource" "configure_vault_k8s_auth" {
   }
 }
 
-# Clean up temporary files
-resource "null_resource" "cleanup_k8s_config_files" {
-  depends_on = [null_resource.configure_vault_k8s_auth]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      rm -f kube_host.txt kube_ca_cert.txt sa_token.txt
-    EOT
-  }
-}
-
-# Set up port forwarding
 resource "null_resource" "vault_port_forward" {
   provisioner "local-exec" {
     command = "kubectl port-forward -n ${var.environment} service/vault 8200:8200 &"
