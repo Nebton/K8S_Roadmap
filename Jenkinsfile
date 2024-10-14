@@ -99,6 +99,7 @@ pipeline {
                     withEnv(["VAULT_NAMESPACE=${env.VAULT_NAMESPACE}"]) {
                         sh 'ansible-playbook vault_setup.yml'
                 }
+              }
             }
         }
         //stage('Deploy ConfigMap') {
