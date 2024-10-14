@@ -149,7 +149,7 @@ resource "null_resource" "configure_vault_k8s_auth" {
 
 # Clean up temporary files
 resource "null_resource" "cleanup_k8s_config_files" {
-  depends_on = [null_resource.verify_vault_k8s_auth]
+  depends_on = [null_resource.configure_vault_k8s_auth]
 
   provisioner "local-exec" {
     command = <<-EOT
