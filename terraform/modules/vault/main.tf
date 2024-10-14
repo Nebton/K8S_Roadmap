@@ -164,10 +164,10 @@ resource "null_resource" "vault_port_forward" {
     command = "kubectl port-forward -n ${var.environment} service/vault 8200:8200 &"
   }
 
-  # Wait for port forwarding to be established
-  provisioner "local-exec" {
-    command = "sleep 10"
+  triggers ={
+    always_run=timestamp()
   }
+
 }
 
 # Vault provider configuration
