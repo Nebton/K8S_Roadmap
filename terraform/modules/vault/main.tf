@@ -105,7 +105,7 @@ provider "vault" {
 
 # Configure Kubernetes auth method directly on the vault-0 pod
 resource "null_resource" "configure_vault_k8s_auth" {
-  depends_on = [null_resource.vault_unseal, kubernetes_service_account.vault_auth]
+  depends_on = [null_resource.vault_unseal]
 
   provisioner "local-exec" {
     command = <<-EOT
