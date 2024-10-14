@@ -75,7 +75,7 @@ pipeline {
                 dir('terraform') {
                     script {
                         sh """
-                        TF_LOG=TRACE terraform plan \
+                        TF_LOG=JSON terraform plan \
                         -var 'environment=${env.DEPLOY_ENV}' \
                         -var 'backend_image=${DOCKER_IMAGE_BACKEND}:backend-${GIT_COMMIT}' \
                         -var 'frontend_image=${DOCKER_IMAGE_FRONTEND}:frontend-${GIT_COMMIT}' \
