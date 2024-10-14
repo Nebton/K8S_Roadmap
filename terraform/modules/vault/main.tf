@@ -97,11 +97,6 @@ resource "kubernetes_secret" "vault_root_token" {
   type = "Opaque"
 }
 
-provider "vault" {
-  address = "http://vault.${var.environment}:8200"
-  token   = local.vault_init.root_token
-}
-
 
 # Configure Kubernetes auth method directly on the vault-0 pod
 resource "null_resource" "configure_vault_k8s_auth" {
