@@ -75,7 +75,7 @@ pipeline {
                 dir('terraform') {
                     script {
                         sh """
-                        TF_LOG=JSON terraform plan \
+                        terraform plan \
                         -var 'environment=${env.DEPLOY_ENV}' \
                         -var 'backend_image=${DOCKER_IMAGE_BACKEND}:backend-${GIT_COMMIT}' \
                         -var 'frontend_image=${DOCKER_IMAGE_FRONTEND}:frontend-${GIT_COMMIT}' \
@@ -91,7 +91,7 @@ pipeline {
             steps {
                 dir('terraform') {
                     script {
-                        sh "TF_LOG=DEBUG terraform apply -auto-approve tfplan"
+                        sh "TF_LOG=JSON terraform apply -auto-approve tfplan"
                     }
                 }
             }
