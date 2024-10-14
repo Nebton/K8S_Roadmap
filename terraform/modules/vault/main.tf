@@ -158,14 +158,32 @@ resource "null_resource" "cleanup_k8s_config_files" {
   }
 }
 
+# Set up port forwarding
+resource "null_resource" "vault_port_forward" {
+  provisioner "local-exec" {
+    command = "kubectl port-forward -n ${var.environment} service/vault 8200:8200 &"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "pkill -f 'kubectl port-forward -n ${var.environment} service/vault 8200:8200'"
+  }
+
+  # Wait for port forwarding to be established
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
+}
+
 # Vault provider configuration
 provider "vault" {
-  address = "http://vault.${var.environment}:8200"
+  address = "http://127.0.0.1:8200"
   token   = local.vault_init.root_token
 }
 
 # Enable KV2 secrets engine
 resource "vault_mount" "kv" {
+  depends_on = [null_resource.vault_port_forward]
   path        = "kv"
   type        = "kv"
   options     = { version = "2" }
