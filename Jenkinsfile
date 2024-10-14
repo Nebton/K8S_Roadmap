@@ -92,7 +92,12 @@ pipeline {
                 dir('terraform') {
                     script {
                         sh "terraform apply -auto-approve tfplan"
+                        env.VAULT_NAMESPACE = sh(script: 'terraform output -raw vault_namespace', returnStdout: true).trim()
                     }
+                }
+                dir ('ansible') {
+                    withEnv(["VAULT_NAMESPACE=${env.VAULT_NAMESPACE}"]) {
+                        sh 'ansible-playbook vault_setup.yml'
                 }
             }
         }

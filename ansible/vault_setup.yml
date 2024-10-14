@@ -1,0 +1,75 @@
+---
+- name: Setup and Configure Vault
+  hosts: localhost
+  vars:
+    vault_namespace: "{{ lookup('env', 'VAULT_NAMESPACE') }}"
+    vault_addr: "http://127.0.0.1:8200"
+  
+  tasks:
+    - name: Initialize Vault
+      command: kubectl exec -n {{ vault_namespace }} vault-0 -- vault operator init -format=json -n 5 -t 3
+      register: vault_init_output
+
+    - name: Save Vault init output
+      copy:
+        content: "{{ vault_init_output.stdout }}"
+        dest: ./vault_init.json
+
+    - name: Load Vault init data
+      set_fact:
+        vault_data: "{{ lookup('file', './vault_init.json') | from_json }}"
+
+    - name: Unseal Vault
+      command: kubectl exec -n {{ vault_namespace }} vault-0 -- vault operator unseal {{ item }}
+      loop: "{{ vault_data.unseal_keys_b64[:3] }}"
+
+    - name: Setup port forwarding
+      command: kubectl port-forward -n {{ vault_namespace }} service/vault 8200:8200
+      async: 300
+      poll: 0
+
+    - name: Configure Kubernetes auth
+      command: >
+        kubectl exec -n {{ vault_namespace }} vault-0 -- vault write auth/kubernetes/config
+        kubernetes_host="{{ lookup('pipe', 'kubectl config view --raw --minify --flatten --output=jsonpath={.clusters[].cluster.server}') }}"
+        kubernetes_ca_cert="{{ lookup('pipe', 'kubectl config view --raw --minify --flatten --output=jsonpath={.clusters[].cluster.certificate-authority-data} | base64 --decode') }}"
+        token_reviewer_jwt="{{ lookup('pipe', 'kubectl create token vault-auth -n default') }}"
+      environment:
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+
+    - name: Enable KV2 secrets engine
+      community.hashi_vault.vault_kv2_engine:
+        url: "{{ vault_addr }}"
+        token: "{{ vault_data.root_token }}"
+        path: kv
+        state: present
+
+    - name: Create frontend secret
+      community.hashi_vault.vault_kv2_write:
+        url: "{{ vault_addr }}"
+        token: "{{ vault_data.root_token }}"
+        engine_mount_point: kv
+        path: frontend
+        data:
+          k3y: "{{ vault_data.unseal_keys_b64[2] }}"
+
+    - name: Create frontend policy
+      community.hashi_vault.vault_policy:
+        url: "{{ vault_addr }}"
+        token: "{{ vault_data.root_token }}"
+        name: frontend
+        policy: |
+          path "kv/data/frontend" {
+            capabilities = ["read"]
+          }
+
+    - name: Create Kubernetes auth role
+      community.hashi_vault.vault_write:
+        url: "{{ vault_addr }}"
+        token: "{{ vault_data.root_token }}"
+        path: auth/kubernetes/role/frontend
+        data:
+          bound_service_account_names: frontend-sa
+          bound_service_account_namespaces: "{{ vault_namespace }}"
+          token_ttl: 3600
+          token_policies: frontend
