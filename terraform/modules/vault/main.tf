@@ -65,7 +65,7 @@ resource "null_resource" "vault_init" {
 
 data "local_file" "vault_init" {
   depends_on = [null_resource.vault_init]
-  filename   = "${path.module}/vault_init.json"
+  filename   = "${path.root}/vault_init.json"
 }
 
 output "vault_init_contents" {
