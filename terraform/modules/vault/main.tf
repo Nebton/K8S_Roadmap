@@ -187,6 +187,7 @@ resource "vault_mount" "kv" {
 
 # Create a secret in kv/frontend with the 3rd unseal key
 resource "vault_kv_secret_v2" "frontend" {
+  depends_on = [vault_mount.kv]
   mount               = vault_mount.kv.path
   name                = "frontend"
   delete_all_versions = true
@@ -197,8 +198,8 @@ resource "vault_kv_secret_v2" "frontend" {
 
 # Create a policy to allow reading the frontend secret
 resource "vault_policy" "frontend" {
+  depends_on = [vault_kv_secret_v2.frontend]
   name = "frontend"
-
   policy = <<EOT
 path "kv/data/frontend" {
   capabilities = ["read"]
@@ -208,6 +209,7 @@ EOT
 
 # Create a Kubernetes auth role for the frontend service account
 resource "vault_kubernetes_auth_backend_role" "frontend" {
+  depends_on = [vault_policy.frontend]
   backend                          = "kubernetes"
   role_name                        = "frontend"
   bound_service_account_names      = ["frontend-sa"]
