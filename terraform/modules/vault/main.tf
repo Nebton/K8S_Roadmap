@@ -50,16 +50,8 @@ data "external" "vault_init" {
   depends_on = [helm_release.vault]
   program = ["sh", "-c", <<EOT
     set -e
-    sleep 60
-    INIT_OUTPUT=$(kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3 2>&1) || {
-      echo "{\"error\": \"$(echo $INIT_OUTPUT | jq -Rsc .)\"}"
-      exit 0
-    }
-    if echo "$INIT_OUTPUT" | jq empty 2>/dev/null; then
-      echo "$INIT_OUTPUT"
-    else
-      echo "{\"error\": \"Invalid JSON output: $(echo $INIT_OUTPUT | jq -Rsc .)\"}"
-    fi
+    sleep 120
+    kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3
   EOT
   ]
 }
