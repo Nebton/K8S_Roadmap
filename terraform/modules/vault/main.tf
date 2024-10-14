@@ -46,15 +46,38 @@ resource "helm_release" "vault" {
 }
 
 
-data "external" "vault_init" {
+resource "null_resource" "vault_init" {
   depends_on = [helm_release.vault]
-  program = ["sh", "-c", <<EOT
-    set -e
-    sleep 120
-    kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3
-  EOT
-  ]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      set -e
+      sleep 120
+      kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3 > vault_init.json
+    EOT
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "rm -f vault_init.json"
+  }
 }
+
+data "local_file" "vault_init" {
+  depends_on = [null_resource.vault_init]
+  filename   = "${path.module}/vault_init.json"
+}
+
+output "vault_init_contents" {
+  value = jsondecode(data.local_file.vault_init.content)
+  sensitive = true
+}
+
+locals {
+  vault_init = jsondecode(data.local_file.vault_init.content)
+}
+
+
 
 # resource "null_resource" "vault_unseal" {
 #   depends_on = [data.external.vault_init]
