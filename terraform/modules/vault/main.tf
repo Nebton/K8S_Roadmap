@@ -108,6 +108,10 @@ resource "null_resource" "configure_vault_k8s_auth" {
       KUBE_CA_CERT=$(kubectl config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.certificate-authority-data}' | base64 --decode)
       SA_TOKEN=$(kubectl create token vault-auth -n default)
       
+      echo $KUBE_HOST
+      echo $KUBE_CA_CERT
+      echo $SA_TOKEN
+
       kubectl exec -n ${var.environment} vault-0 -- /bin/sh -c '
         vault login ${local.vault_init.root_token}
         vault auth enable kubernetes
