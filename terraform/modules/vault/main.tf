@@ -157,3 +157,48 @@ resource "null_resource" "cleanup_k8s_config_files" {
     EOT
   }
 }
+
+# Vault provider configuration
+provider "vault" {
+  address = "http://vault.${var.environment}:8200"
+  token   = local.vault_init.root_token
+}
+
+# Enable KV2 secrets engine
+resource "vault_mount" "kv" {
+  path        = "kv"
+  type        = "kv"
+  options     = { version = "2" }
+  description = "KV Version 2 secret engine mount"
+}
+
+# Create a secret in kv/frontend with the 3rd unseal key
+resource "vault_kv_secret_v2" "frontend" {
+  mount               = vault_mount.kv.path
+  name                = "frontend"
+  delete_all_versions = true
+  data_json = jsonencode({
+    k3y = local.vault_init.unseal_keys_b64[2]
+  })
+}
+
+# Create a policy to allow reading the frontend secret
+resource "vault_policy" "frontend" {
+  name = "frontend"
+
+  policy = <<EOT
+path "kv/data/frontend" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+# Create a Kubernetes auth role for the frontend service account
+resource "vault_kubernetes_auth_backend_role" "frontend" {
+  backend                          = "kubernetes"
+  role_name                        = "frontend"
+  bound_service_account_names      = ["frontend-sa"]
+  bound_service_account_namespaces = [var.environment]
+  token_ttl                        = 3600
+  token_policies                   = [vault_policy.frontend.name]
+}
