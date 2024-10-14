@@ -52,7 +52,7 @@ resource "null_resource" "vault_init" {
   provisioner "local-exec" {
     command = <<-EOT
       set -e
-      sleep 120
+      sleep 30
       kubectl exec -n ${var.environment} vault-0 -- vault operator init -format=json -n 5 -t 3 > vault_init.json
     EOT
   }
@@ -78,6 +78,29 @@ locals {
 }
 
 
+resource "null_resource" "vault_unseal" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${local.vault_init.unseal_keys_b64[0]}
+      kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${local.vault_init.unseal_keys_b64[1]}
+      kubectl exec -n ${var.environment} vault-0 -- vault operator unseal ${local.vault_init.unseal_keys_b64[2]}
+    EOT
+  }
+}
+
+# Store root token securely (use a more secure method in production)
+resource "kubernetes_secret" "vault_root_token" {
+  metadata {
+    name = "vault-root-token"
+    namespace = var.environment
+  }
+
+  data = {
+    token = local.vault_init.root_token
+  }
+
+  type = "Opaque"
+}
 
 # resource "null_resource" "vault_unseal" {
 #   depends_on = [data.external.vault_init]
