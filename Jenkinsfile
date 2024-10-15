@@ -48,6 +48,29 @@ pipeline {
             }
         }
         
+        stage('Security Scan and SBOM Generation') {
+            steps {
+                script {
+                    // Function to scan, generate SBOM, and print for an image
+                    def scanAndGenerateSBOM = { imageName ->
+                        // Vulnerability Scan
+                        sh "trivy image --exit-code 1 --severity HIGH,CRITICAL ${imageName}"
+                        
+                        // Generate and print SBOM
+                        echo "Generating and printing SBOM for ${imageName}"
+                        sh "trivy image --format cyclonedx ${imageName} > sbom_${imageName.replaceAll(':', '_')}.json"
+                        sh "cat sbom_${imageName.replaceAll(':', '_')}.json"
+                    }
+                    
+                    // Scan backend images
+                    scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1")
+                    scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2")
+                    
+                    // Scan frontend image
+                    scanAndGenerateSBOM("$DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT")
+                }
+            }
+        }   
         stage('Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
