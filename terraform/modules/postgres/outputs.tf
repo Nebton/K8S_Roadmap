@@ -9,6 +9,10 @@ output "postgres_connection_info" {
   sensitive = true
 }
 
+output "postgres_namespace" {
+  value = module.postgres.postgres_namespace
+}
+
 output "postgres_password" {
   value     = "P@55w0rd"
   sensitive = true
