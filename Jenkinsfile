@@ -98,8 +98,8 @@ pipeline {
                         }
                     }
                     dir ('ansible') {
-                        withEnv(["VAULT_NAMESPACE=${env.VAULT_NAMESPACE},
-                            POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}"
+                        withEnv(["VAULT_NAMESPACE=${env.VAULT_NAMESPACE}",
+                            "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}"
                         ]) {
                             sh 'ansible-playbook vault_setup.yml'
                     }
