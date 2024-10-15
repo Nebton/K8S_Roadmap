@@ -95,11 +95,13 @@ pipeline {
                             sh "terraform apply -auto-approve tfplan"
                             env.VAULT_NAMESPACE = sh(script: 'terraform output -raw vault_namespace', returnStdout: true).trim()
                             env.POSTGRES_PASSWORD= sh(script: 'terraform output -raw postgres_password', returnStdout: true).trim()
+                            env.POSTGRES_NAMESPACE= sh(script: 'terraform output -raw postgres_namespace', returnStdout: true).trim()
                         }
                     }
                     dir ('ansible') {
                         withEnv(["VAULT_NAMESPACE=${env.VAULT_NAMESPACE}",
-                            "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}"
+                            "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
+                            "POSTGRES_NAMESPACE=${env.POSTGRES_NAMESPACE}"
                         ]) {
                             sh 'ansible-playbook vault_setup.yml'
                     }

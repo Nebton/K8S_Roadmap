@@ -1,11 +1,13 @@
-# output "kubernetes_namespace" {
-#   value = module.kubernetes_resources.namespace
-# }
-#
-# output "application_status" {
-#   value = module.application.status
-# }
-#
-# output "monitoring_status" {
-#   value = module.monitoring.status
-# }
+output "postgres_password" {
+  value     = module.postgres.postgres_password
+  sensitive = true
+}
+
+output "postgres_namespace" {
+  value = module.postgres.postgres_namespace
+}
+
+output "vault_namespace" {
+  value = module.vault.vault_namespace
+}
+
