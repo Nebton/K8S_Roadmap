@@ -15,9 +15,10 @@ resource "kubernetes_config_map" "postgres_init_scripts" {
 
   data = {
     "init.sql" = <<-EOT
+
       CREATE ROLE "ro" NOINHERIT;
 
-      GRANT SELECT ON ALL TABLES IN SCHEMA public TO "ro";
+
 
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
@@ -32,6 +33,9 @@ resource "kubernetes_config_map" "postgres_init_scripts" {
       ('alice_wonder', 'alice@example.com'),
       ('bob_builder', 'bob@example.com'),
       ('charlie_brown', 'charlie@example.com');
+
+      GRANT SELECT ON ALL TABLES IN SCHEMA public TO "ro";
+
     EOT
   }
 }
