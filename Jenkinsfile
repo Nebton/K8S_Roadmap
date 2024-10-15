@@ -103,7 +103,7 @@ pipeline {
                             "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
                             "POSTGRES_NAMESPACE=${env.POSTGRES_NAMESPACE}"
                         ]) {
-                            sh 'ansible-playbook vault_setup.yml'
+                            sh 'ansible-playbook -v vault_setup.yml'
                     }
                   }
                }
