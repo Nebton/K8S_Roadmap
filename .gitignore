@@ -1,2 +1,3 @@
 *.terraform*
 vault/vault_keys.json
+ansible/vault_init.json

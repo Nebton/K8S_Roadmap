@@ -1,9 +1,11 @@
 ---
 - name: Setup and Configure Vault
   hosts: localhost
+  gather_facts: no
   vars:
     vault_namespace: "{{ lookup('env', 'VAULT_NAMESPACE') }}"
     vault_addr: "http://127.0.0.1:8200"
+    postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
   
   tasks:
     - name: Initialize Vault
@@ -25,51 +27,150 @@
 
     - name: Setup port forwarding
       command: kubectl port-forward -n {{ vault_namespace }} service/vault 8200:8200
-      async: 300
+      async: 3600
       poll: 0
+      register: port_forward_job
+
+    - name: Wait for Vault to be accessible
+      uri:
+        url: "http://127.0.0.1:8200/v1/sys/health"
+        method: GET
+      register: vault_health
+      until: vault_health.status == 200
+      retries: 12
+      delay: 5
+
+    - name: Create vault-auth service account
+      shell: kubectl create serviceaccount vault-auth -n {{ vault_namespace }}
+      ignore_errors: yes  
+
+    - name: Create vault-auth-binding cluster role binding
+      shell: |
+        kubectl create clusterrolebinding -n {{ vault_namespace }} vault-auth-binding \
+          --clusterrole=system:auth-delegator \
+          --serviceaccount=default:vault-auth
+      ignore_errors: yes 
+
+    - name: Enable Kubernetes auth method
+      shell: vault auth enable kubernetes
+      environment:
+        VAULT_ADDR: "http://127.0.0.1:8200"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+      register: enable_k8s_auth
 
     - name: Configure Kubernetes auth
-      command: >
-        kubectl exec -n {{ vault_namespace }} vault-0 -- vault write auth/kubernetes/config
-        kubernetes_host="{{ lookup('pipe', 'kubectl config view --raw --minify --flatten --output=jsonpath={.clusters[].cluster.server}') }}"
-        kubernetes_ca_cert="{{ lookup('pipe', 'kubectl config view --raw --minify --flatten --output=jsonpath={.clusters[].cluster.certificate-authority-data} | base64 --decode') }}"
-        token_reviewer_jwt="{{ lookup('pipe', 'kubectl create token vault-auth -n default') }}"
+      shell: |
+          vault write auth/kubernetes/config \
+          kubernetes_host="{{ lookup('pipe', 'kubectl config view --raw --minify --flatten --output=jsonpath={.clusters[].cluster.server}') }}" \
+          kubernetes_ca_cert="{{ lookup('pipe', 'kubectl config view --raw --minify --flatten --output=jsonpath={.clusters[].cluster.certificate-authority-data} | base64 --decode') }}" \
+          token_reviewer_jwt="{{ lookup('pipe', 'kubectl create token vault-auth -n {{ vault_namespace }}') }}"
       environment:
         VAULT_TOKEN: "{{ vault_data.root_token }}"
+        VAULT_ADDR: "{{ vault_addr }}"
 
     - name: Enable KV2 secrets engine
-      community.hashi_vault.vault_kv2_engine:
-        url: "{{ vault_addr }}"
-        token: "{{ vault_data.root_token }}"
-        path: kv
-        state: present
+      command: >
+        vault secrets enable -path=kv kv-v2
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
 
     - name: Create frontend secret
-      community.hashi_vault.vault_kv2_write:
-        url: "{{ vault_addr }}"
-        token: "{{ vault_data.root_token }}"
-        engine_mount_point: kv
-        path: frontend
-        data:
-          k3y: "{{ vault_data.unseal_keys_b64[2] }}"
+      command: >
+        vault kv put kv/frontend k3y="{{ vault_data.unseal_keys_b64[2] }}"
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
 
     - name: Create frontend policy
-      community.hashi_vault.vault_policy:
-        url: "{{ vault_addr }}"
-        token: "{{ vault_data.root_token }}"
-        name: frontend
-        policy: |
-          path "kv/data/frontend" {
-            capabilities = ["read"]
-          }
+      shell: |
+        cat << EOF | vault policy write frontend -
+        path "kv/data/frontend" {
+          capabilities = ["read"]
+        }
+        EOF
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
 
     - name: Create Kubernetes auth role
-      community.hashi_vault.vault_write:
-        url: "{{ vault_addr }}"
-        token: "{{ vault_data.root_token }}"
-        path: auth/kubernetes/role/frontend
-        data:
-          bound_service_account_names: frontend-sa
-          bound_service_account_namespaces: "{{ vault_namespace }}"
-          token_ttl: 3600
-          token_policies: frontend
+      shell: |
+        vault write auth/kubernetes/role/frontend \
+          bound_service_account_names=frontend-sa \
+          bound_service_account_namespaces="{{ vault_namespace }}" \
+          token_ttl=3600 \
+          token_policies=frontend
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+
+    - name: Enable database secrets engine
+      command: vault secrets enable database
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+
+    - name: Create readonly.sql file
+      copy:
+        content: |
+          CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' INHERIT;
+          GRANT ro TO "{{name}}";
+        dest: ./readonly.sql
+
+    - name: Configure Vault with PostgreSQL connection
+      shell: |
+        vault write database/config/postgresql \
+          plugin_name=postgresql-database-plugin \
+          connection_url="postgresql://{{'{{'}}username{{'}}'}}:{{'{{'}}password{{'}}'}}@postgres-postgresql.{{ vault_namespace }}.svc.cluster.local/postgres?sslmode=disable" \
+          allowed_roles=readonly \
+          username="postgres" \
+          password="{{ postgres_password }}"
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+
+    - name: Create role for generating dynamic database credentials
+      shell: |
+        vault write database/roles/readonly \
+          db_name=postgresql \
+          creation_statements=@readonly.sql \
+          default_ttl=1h \
+          max_ttl=24h
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+
+    - name: Create backend policy
+      copy:
+        content: |
+          path "database/creds/readonly" {
+            capabilities = ["read"]
+          }
+        dest: ./backend-policy.hcl
+
+    - name: Write backend policy to Vault
+      shell: |
+        vault policy write backend backend-policy.hcl
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+
+    - name: Create Kubernetes auth role for backend
+      shell: |
+        vault write auth/kubernetes/role/backend \
+          bound_service_account_names=backend-sa \
+          bound_service_account_namespaces="{{ vault_namespace }}" \
+          token_ttl=3600 \
+          token_policies=backend
+      environment:
+        VAULT_ADDR: "{{ vault_addr }}"
+        VAULT_TOKEN: "{{ vault_data.root_token }}"
+
+    # Optional: Clean up temporary files
+    - name: Remove temporary files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - ./readonly.sql
+        - ./backend-policy.hcl
