@@ -54,7 +54,7 @@ pipeline {
                     // Function to scan, generate SBOM, and print for an image
                     def scanAndGenerateSBOM = { imageName ->
                         // Vulnerability Scan
-                        sh "trivy image --exit-code 1 --severity HIGH,CRITICAL ${imageName}"
+                        sh "trivy image --format json --exit-code 1 --severity HIGH,CRITICAL ${imageName}"
                         
                         // Generate and print SBOM
                         echo "Generating and printing SBOM for ${imageName}"
