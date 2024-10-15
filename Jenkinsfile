@@ -103,7 +103,7 @@ pipeline {
                             "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
                             "POSTGRES_NAMESPACE=${env.POSTGRES_NAMESPACE}"
                         ]) {
-                            sh 'ansible-playbook -v vault_setup.yml'
+                            sh 'export ANSIBLE_COW_SELECTION= random; ansible-playbook -v vault_setup.yml'
                     }
                   }
                }

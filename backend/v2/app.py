@@ -50,7 +50,7 @@ def get_db_connection():
     # Connect to the database using the dynamic credentials
     conn = psycopg2.connect(
         host="postgres-postgresql",
-        database="flaskapp",
+        database="flaskdb",
         user=username,
         password=password
     )
