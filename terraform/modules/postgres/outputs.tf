@@ -10,7 +10,7 @@ output "postgres_connection_info" {
 }
 
 output "postgres_namespace" {
-  value = module.postgres.postgres_namespace
+  value = var.environment 
 }
 
 output "postgres_password" {
