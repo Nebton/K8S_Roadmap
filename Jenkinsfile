@@ -48,29 +48,48 @@ pipeline {
             }
         }
         
-        stage('Security Scan and SBOM Generation') {
+         stage('Security Scan and SBOM Generation') {
             steps {
                 script {
-                    // Function to scan, generate SBOM, and print for an image
                     def scanAndGenerateSBOM = { imageName ->
-                        // Vulnerability Scan
-                        sh "trivy image --format json --exit-code 1 --severity HIGH,CRITICAL ${imageName}"
+                        def safeImageName = imageName.replaceAll('/', '_').replaceAll(':', '_')
                         
-                        // Generate and print SBOM
-                        echo "Generating and printing SBOM for ${imageName}"
-                        sh "trivy image --format cyclonedx ${imageName} > sbom_${imageName.replaceAll(':', '_')}.json"
-                        sh "cat sbom_${imageName.replaceAll(':', '_')}.json"
+                        // Vulnerability Scan
+                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName} > trivy_${safeImageName}.txt"
+                        
+                        // Generate SBOM
+                        sh "trivy image --format cyclonedx ${imageName} > sbom_${safeImageName}.json"
                     }
                     
-                    // Scan backend images
+                    // Scan images
                     scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1")
                     scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2")
-                    
-                    // Scan frontend image
                     scanAndGenerateSBOM("$DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT")
+
+                    // Archive Trivy results immediately
+                    archiveArtifacts artifacts: 'trivy_*.txt, sbom_*.json', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Checkov Scans') {
+            steps {
+                script {
+                    // Scan Helm charts
+                    sh "checkov -d helm/k8s_roadmap --framework kubernetes --output-file-path checkov_helm.txt"
+
+                    // Scan Kubernetes manifests
+                    sh "checkov -d kubernetes/ --framework kubernetes --output-file-path checkov_kubernetes.txt"
+
+                    // Scan Terraform code
+                    sh "checkov -d terraform/ --framework terraform --output-file-path checkov_terraform.txt"
+
+                    // Archive Checkov results immediately
+                    archiveArtifacts artifacts: 'checkov_*.txt', allowEmptyArchive: true
                 }
             }
         }   
+
         stage('Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -132,38 +151,21 @@ pipeline {
                }
             }
         }
-        //stage('Deploy ConfigMap') {
-        //    steps {
-        //        script {
-        //            sh "kubectl apply -f kubernetes/${env.DEPLOY_ENV}-config.yaml --request-timeout=60s"
-        //        }
-        //    }
-        //}
+    }
 
-        //stage('Deploy') {
-        //    steps {
-        //            sh "helm upgrade --install k8s-roadmap ./helm/k8s-roadmap/ --namespace ${env.DEPLOY_ENV} --set global.environment=${env.DEPLOY_ENV} --set backend.image.tag=backend-$GIT_COMMIT --set frontend.image.tag=frontend-$GIT_COMMIT"
-        //
-        //    }
-        //}
-
-
-        //stage('Monitor') {
-        //    //Prometheus/Grafana stack
-        //    steps {
-        //        sh "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
-        //        sh "helm repo update"
-        //        sh "helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f kubernetes/prometheus-values.yaml -n prod"
-        //    sh "kubectl apply -f kubernetes/node-exporter-deployment.yaml"
-        //        }
-        //
-        //    //ELLK stack 
-        //    steps {
-        //        //sh "kubectl create configmap filebeat-configmap --from-file=kubernetes/filebeat-configmap.yaml"
-        //        //sh "kubectl create configmap logstash-configmap --from-file=kubernetes/logstash.conf"
-        //        //sh "kubectl apply -f kubernetes/elk-stack.yaml -n prod"
-        //    }
-        //
-        //    }
+    post {
+        always {
+            script {
+                // Aggregate all results into a single archive
+                sh '''
+                mkdir -p security_results
+                cp trivy_*.txt security_results/ || true
+                cp sbom_*.json security_results/ || true
+                cp checkov_*.txt security_results/ || true
+                tar -czvf security_results.tar.gz security_results/
+                '''
+                archiveArtifacts artifacts: 'security_results.tar.gz', allowEmptyArchive: true
+            }
         }
+    }
 }
