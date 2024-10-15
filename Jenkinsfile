@@ -13,13 +13,10 @@ pipeline {
         BACKEND_VERSIONS = "${params.BACKEND_VERSIONS}"
     }
     
-    
-        stages {
-
-            stage('Determine Environment') {
-                steps {
+    stages {
+        stage('Determine Environment') {
+            steps {
                 script {
-
                     if (env.GIT_BRANCH == 'origin/master') {
                         env.DEPLOY_ENV = 'prod'
                     } else if (env.GIT_BRANCH == 'origin/staging') {
@@ -48,17 +45,20 @@ pipeline {
             }
         }
         
-         stage('Security Scan and SBOM Generation') {
+        stage('Security Scan and SBOM Generation') {
             steps {
                 script {
                     def scanAndGenerateSBOM = { imageName ->
                         def safeImageName = imageName.replaceAll('/', '_').replaceAll(':', '_')
                         
-                        // Vulnerability Scan
-                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName} > trivy_${safeImageName}.txt"
+                        // Vulnerability Scan (normal output to console)
+                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName}"
                         
-                        // Generate SBOM
-                        sh "trivy image --format cyclonedx ${imageName} > sbom_${safeImageName}.json"
+                        // Vulnerability Scan (JSON for archiving, suppress stdout)
+                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL -f json ${imageName} > trivy_${safeImageName}.json 1>/dev/null"
+                        
+                        // Generate SBOM (suppress stdout)
+                        sh "trivy image --format cyclonedx ${imageName} > sbom_${safeImageName}.json 1>/dev/null"
                     }
                     
                     // Scan images
@@ -67,7 +67,7 @@ pipeline {
                     scanAndGenerateSBOM("$DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT")
 
                     // Archive Trivy results immediately
-                    archiveArtifacts artifacts: 'trivy_*.txt, sbom_*.json', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'trivy_*.json, sbom_*.json', allowEmptyArchive: true
                 }
             }
         }
@@ -75,20 +75,23 @@ pipeline {
         stage('Checkov Scans') {
             steps {
                 script {
-                    // Scan Helm charts
-                    sh "checkov -d helm/k8s_roadmap --framework kubernetes --output-file-path checkov_helm.txt"
+                    // Determine environment
+                    def environment = env.DEPLOY_ENV ?: 'default'
 
-                    // Scan Kubernetes manifests
-                    sh "checkov -d kubernetes/ --framework kubernetes --output-file-path checkov_kubernetes.txt"
+                    // Scan Helm charts (suppress stdout for file creation)
+                    sh "checkov -d helm/k8s_roadmap --framework kubernetes --output-file-path checkov_${environment}/helm 1>/dev/null || true"
 
-                    // Scan Terraform code
-                    sh "checkov -d terraform/ --framework terraform --output-file-path checkov_terraform.txt"
+                    // Scan Kubernetes manifests (suppress stdout for file creation)
+                    sh "checkov -d kubernetes/ --framework kubernetes --output-file-path checkov_${environment}/kubernetes 1>/dev/null || true"
+
+                    // Scan Terraform code (suppress stdout for file creation)
+                    sh "checkov -d terraform/ --framework terraform --output-file-path checkov_${environment}/terraform 1>/dev/null || true"
 
                     // Archive Checkov results immediately
-                    archiveArtifacts artifacts: 'checkov_*.txt', allowEmptyArchive: true
+                    archiveArtifacts artifacts: "checkov_${environment}/*/results_cli.txt", allowEmptyArchive: true
                 }
             }
-        }   
+        }
 
         stage('Push') {
             steps {
@@ -136,19 +139,19 @@ pipeline {
                         script {
                             sh "terraform apply -auto-approve tfplan"
                             env.VAULT_NAMESPACE = sh(script: 'terraform output -raw vault_namespace', returnStdout: true).trim()
-                            env.POSTGRES_PASSWORD= sh(script: 'terraform output -raw postgres_password', returnStdout: true).trim()
-                            env.POSTGRES_NAMESPACE= sh(script: 'terraform output -raw postgres_namespace', returnStdout: true).trim()
+                            env.POSTGRES_PASSWORD = sh(script: 'terraform output -raw postgres_password', returnStdout: true).trim()
+                            env.POSTGRES_NAMESPACE = sh(script: 'terraform output -raw postgres_namespace', returnStdout: true).trim()
                         }
                     }
-                    dir ('ansible') {
+                    dir('ansible') {
                         withEnv(["VAULT_NAMESPACE=${env.VAULT_NAMESPACE}",
                             "POSTGRES_PASSWORD=${env.POSTGRES_PASSWORD}",
                             "POSTGRES_NAMESPACE=${env.POSTGRES_NAMESPACE}"
                         ]) {
-                            sh 'export ANSIBLE_COW_SELECTION= random; ansible-playbook -v vault_setup.yml'
+                            sh 'export ANSIBLE_COW_SELECTION=random; ansible-playbook -v vault_setup.yml'
+                        }
                     }
-                  }
-               }
+                }
             }
         }
     }
@@ -159,9 +162,9 @@ pipeline {
                 // Aggregate all results into a single archive
                 sh '''
                 mkdir -p security_results
-                cp trivy_*.txt security_results/ || true
+                cp trivy_*.json security_results/ || true
                 cp sbom_*.json security_results/ || true
-                cp checkov_*.txt security_results/ || true
+                cp -R checkov_*/ security_results/ || true
                 tar -czvf security_results.tar.gz security_results/
                 '''
                 archiveArtifacts artifacts: 'security_results.tar.gz', allowEmptyArchive: true
