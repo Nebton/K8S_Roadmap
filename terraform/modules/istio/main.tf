@@ -18,17 +18,16 @@ resource "helm_release" "istio_base" {
   name             = "istio-base"
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "base"
-  version          = "1.23.2"  # Pin the version
+  version          = "1.23.2"
   namespace        = var.environment
   timeout          = 300 
-
-  depends_on = [kubernetes_namespace.app_namespace]
-
+  depends_on       = [kubernetes_namespace.app_namespace]
+  values           = [file("${path.module}/istio-values.yaml")]
+  
   set {
     name  = "global.istioNamespace"
     value = var.environment 
   }
-
 }
 
 # Istiod
@@ -38,15 +37,14 @@ resource "helm_release" "istiod" {
   chart      = "istiod"
   version    = "1.23.2"  
   namespace  = var.environment
-  timeout    = 900  
-
+  timeout    = 600  # Reduced from 900
   depends_on = [helm_release.istio_base]
-
+  values     = [file("${path.module}/istio-values.yaml")]
+  
   set {
     name  = "global.hub"
     value = "docker.io/istio"
   }
-
   set {
     name  = "global.tag"
     value = "1.23.2"
@@ -63,46 +61,52 @@ resource "helm_release" "istio_ingress" {
   timeout    = 300
   depends_on = [helm_release.istiod]
   wait       = true 
-
-  values = [
+  values     = [
+    file("${path.module}/istio-values.yaml"),
     yamlencode({
-      service = {
-        type = "LoadBalancer"
-        ports = [
-          {
-            name       = "status-port"
-            port       = 15021
-            targetPort = 15021
-          },
-          {
-            name       = "http2"
-            port       = 80
-            targetPort = 8080
-          },
-          {
-            name       = "https"
-            port       = 443
-            targetPort = 8443
-          },
-          {
-            name       = "tcp"
-            port       = 31400
-            targetPort = 31400
-          },
-          {
-            name       = "http-envoy-prom"
-            port       = 15020
-            targetPort = 15020
+      gateways = {
+        istio-ingressgateway = {
+          autoscaleEnabled = false
+          replicaCount = 1
+          service = {
+            type = "LoadBalancer"
+            ports = [
+              {
+                name       = "status-port"
+                port       = 15021
+                targetPort = 15021
+              },
+              {
+                name       = "http2"
+                port       = 80
+                targetPort = 8080
+              },
+              {
+                name       = "https"
+                port       = 443
+                targetPort = 8443
+              },
+              {
+                name       = "tcp"
+                port       = 31400
+                targetPort = 31400
+              },
+              {
+                name       = "http-envoy-prom"
+                port       = 15020
+                targetPort = 15020
+              }
+            ]
           }
-        ]
-      }
-      meshConfig = {
-        enablePrometheusMerge = true
-      }
-      annotations = {
-        "prometheus.io/scrape" = "true"
-        "prometheus.io/port"   = "15020"
-        "prometheus.io/path"   = "/stats/prometheus"
+          meshConfig = {
+            enablePrometheusMerge = true
+          }
+          annotations = {
+            "prometheus.io/scrape" = "true"
+            "prometheus.io/port"   = "15020"
+            "prometheus.io/path"   = "/stats/prometheus"
+          }
+        }
       }
     })
   ]
