@@ -35,13 +35,13 @@ module "kubernetes_resources" {
   config_path = "${path.root}/../kubernetes/config/${var.environment}-config.yaml"
 }
 
-# module "istio" {
-#   source      = "./modules/istio"
-#   environment = "istio-system"
-#   injected_namespace = var.environment
-#   config_path = "${path.root}/../kubernetes/istio"
-#   depends_on  = [module.kubernetes_resources]
-# }
+module "istio" {
+  source      = "./modules/istio"
+  environment = "istio-system"
+  injected_namespace = var.environment
+  config_path = "${path.root}/../kubernetes/istio"
+  depends_on  = [module.kubernetes_resources]
+}
 
 module "application" {
   source         = "./modules/application"
@@ -58,13 +58,13 @@ module "application" {
   backend_autoscaling_cpu_threshold = var.backend_autoscaling_cpu_threshold
 }
 
-# module "monitoring" {
-#   source      = "./modules/monitoring"
-#   environment = "monitoring" 
-#   monitored_namespace = var.environment
-#   config_path = "${path.root}/../kubernetes/monitoring"
-#   depends_on  = [module.kubernetes_resources]
-# }
+module "monitoring" {
+  source      = "./modules/monitoring"
+  environment = "monitoring" 
+  monitored_namespace = var.environment
+  config_path = "${path.root}/../kubernetes/monitoring"
+  depends_on  = [module.kubernetes_resources]
+}
 
 module "vault" {
   source      = "./modules/vault"

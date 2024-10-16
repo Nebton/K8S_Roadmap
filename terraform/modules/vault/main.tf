@@ -15,6 +15,9 @@ terraform {
 resource "kubernetes_namespace" "vault" {
   metadata {
     name = var.environment
+    labels = {
+      istio-injection = "enabled"
+    }
   }
 }
 
