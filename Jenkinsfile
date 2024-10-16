@@ -90,13 +90,13 @@ pipeline {
                     def environment = env.DEPLOY_ENV ?: 'default'
 
                     // Scan Helm charts (suppress stdout for file creation)
-                    sh "checkov -d helm/k8s_roadmap --framework kubernetes --output-file-path checkov_${environment}/helm 1>/dev/null || true"
+                    sh "checkov -d helm/k8s-roadmap --framework kubernetes --output-file-path checkov_${environment}/checkov-helm 1>/dev/null || true"
 
                     // Scan Kubernetes manifests (suppress stdout for file creation)
-                    sh "checkov -d kubernetes/ --framework kubernetes --output-file-path checkov_${environment}/kubernetes 1>/dev/null || true"
+                    sh "checkov -d kubernetes/ --framework kubernetes --output-file-path checkov_${environment}/checkov-k8s 1>/dev/null || true"
 
                     // Scan Terraform code (suppress stdout for file creation)
-                    sh "checkov -d terraform/ --framework terraform --output-file-path checkov_${environment}/terraform 1>/dev/null || true"
+                    sh "checkov -d terraform/ --framework terraform --output-file-path checkov_${environment}/checkov-tf 1>/dev/null || true"
 
                     // Archive Checkov results immediately
                     archiveArtifacts artifacts: "checkov_${environment}/*/results_cli.txt", allowEmptyArchive: true
