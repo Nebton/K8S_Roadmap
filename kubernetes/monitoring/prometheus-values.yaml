@@ -11,6 +11,13 @@ prometheus:
         resources:
           requests:
             storage: 2Gi  
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
 
 additionalServiceMonitors:
   - name: node-exporter
@@ -46,7 +53,20 @@ grafana:
     enabled: true
     accessModes: ["ReadWriteOnce"]
     size: 1Gi  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 
 prometheusOperator:
   createCustomResource: true
-
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
