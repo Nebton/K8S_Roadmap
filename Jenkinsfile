@@ -44,7 +44,18 @@ pipeline {
                 sh 'docker build -t $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT ./frontend'
             }
         }
-        
+
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1'
+                    sh 'docker push $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2'
+                    sh 'docker push $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT'
+                }
+            }
+        }       
+
         stage('Security Scan and SBOM Generation') {
             steps {
                 script {
@@ -89,17 +100,6 @@ pipeline {
 
                     // Archive Checkov results immediately
                     archiveArtifacts artifacts: "checkov_${environment}/*/results_cli.txt", allowEmptyArchive: true
-                }
-            }
-        }
-
-        stage('Push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1'
-                    sh 'docker push $DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2'
-                    sh 'docker push $DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT'
                 }
             }
         }
