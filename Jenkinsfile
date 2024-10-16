@@ -156,19 +156,19 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            script {
-                // Aggregate all results into a single archive
-                sh '''
-                mkdir -p security_results
-                cp trivy_*.json security_results/ || true
-                cp sbom_*.json security_results/ || true
-                cp -R checkov_*/ security_results/ || true
-                tar -czvf security_results.tar.gz security_results/
-                '''
-                archiveArtifacts artifacts: 'security_results.tar.gz', allowEmptyArchive: true
-            }
-        }
-    }
+    //post {
+    //    always {
+    //        script {
+    //            // Aggregate all results into a single archive
+    //            sh '''
+    //            mkdir -p security_results
+    //            cp trivy_*.json security_results/ || true
+    //            cp sbom_*.json security_results/ || true
+    //            cp -R checkov_*/ security_results/ || true
+    //            tar -czvf security_results.tar.gz security_results/
+    //            '''
+    //            archiveArtifacts artifacts: 'security_results.tar.gz', allowEmptyArchive: true
+    //        }
+    //    }
+    //}
 }
