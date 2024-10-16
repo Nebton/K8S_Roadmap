@@ -159,7 +159,7 @@ resource "kubectl_manifest" "split_traffic" {
 
 ## Disable TLS on backend metrics port
 resource "kubectl_manifest" "backend_peer_authentication" {
-  yaml_body  =  templatefile( "${path.module}/traffic/backend-peer-authentication.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/tls/backend-peer-authentication.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
