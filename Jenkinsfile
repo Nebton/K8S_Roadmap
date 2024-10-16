@@ -66,10 +66,10 @@ pipeline {
                         sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName}"
                         
                         // Vulnerability Scan (JSON for archiving, suppress stdout)
-                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL -f json ${imageName} > trivy_${safeImageName}.json 1>/dev/null"
+                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName} -f json > trivy_${safeImageName}.json"
                         
                         // Generate SBOM (suppress stdout)
-                        sh "trivy image --format cyclonedx ${imageName} > sbom_${safeImageName}.json 1>/dev/null"
+                        sh "trivy image  ${imageName} --format cyclonedx > sbom_${safeImageName}.json"
                     }
                     
                     // Scan images
