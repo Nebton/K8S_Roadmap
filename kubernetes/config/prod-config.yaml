@@ -5,6 +5,6 @@ metadata:
   name: app-config
   namespace: prod
 data:
-  DATABASE_URL: "mongodb://prod-mongodb.prod.svc.cluster.local:27017/myapp"
-  API_URL: "http://api.example.com"
+  DATABASE_URL: "postgresql://{{username}}:{{password}}@postgres-postgresql.prod.svc.cluster.local/postgres"
+  API_URL: "https://flask-app.com/api"
   LOG_LEVEL: "warn"

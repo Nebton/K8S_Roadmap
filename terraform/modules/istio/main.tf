@@ -164,38 +164,59 @@ resource "kubectl_manifest" "backend_peer_authentication" {
   override_namespace = var.injected_namespace
 }
 
-# resource "kubectl_manifest" "default_deny_policy" {
-#   yaml_body  =  templatefile( "${var.config_path}/../authz/default-deny.yaml", {})
-#   depends_on = [kubectl_manifest.mtls_policy]
-#   override_namespace = var.environment
-# }
-#
-# resource "kubectl_manifest" "allow_ingress" {
-#   yaml_body  =  templatefile( "${var.config_path}/../authz/allow-ingress.yaml", {})
-#   depends_on = [kubectl_manifest.mtls_policy]
-#   override_namespace = var.injected_namespace
-# }
-#
-# resource "kubectl_manifest" "allow_ingress_to_apps" {
-#   yaml_body  =  templatefile( "${var.config_path}/../authz/allow-ingress-apps.yaml", {})
-#   depends_on = [kubectl_manifest.mtls_policy]
-#   override_namespace = var.environment
-# }
-#
-# resource "kubectl_manifest" "allow_traffic_to_backend" {
-#   yaml_body  =  templatefile( "${var.config_path}/../authz/backend-allow.yaml", {})
-#   depends_on = [kubectl_manifest.mtls_policy]
-#   override_namespace = var.injected_namespace
-# }
-#
-# resource "kubectl_manifest" "allow_admin_full_access" {
-#   yaml_body  =  templatefile( "${var.config_path}/../authz/admin-allow.yaml", {})
-#   depends_on = [kubectl_manifest.mtls_policy]
-#   override_namespace = var.injected_namespace
-# }
-#
-# resource "kubectl_manifest" "allow_front_back_communication" {
-#   yaml_body  =  templatefile( "${var.config_path}/../authz/front-back.yaml", {})
-#   depends_on = [kubectl_manifest.mtls_policy]
-#   override_namespace = var.injected_namespace
-# }
+resource "kubectl_manifest" "default_deny_policy" {
+  yaml_body  =  templatefile( "${var.config_path}/../authz/default-deny.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.environment
+}
+
+resource "kubectl_manifest" "allow_ingress" {
+  yaml_body  =  templatefile( "${var.config_path}/../authz/allow-ingress.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "allow_ingress_to_apps" {
+  yaml_body  =  templatefile( "${var.config_path}/../authz/allow-ingress-apps.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.environment
+}
+
+resource "kubectl_manifest" "allow_traffic_to_backend" {
+  yaml_body  =  templatefile( "${var.config_path}/../authz/backend-allow.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "allow_admin_full_access" {
+  yaml_body  =  templatefile( "${var.config_path}/../authz/admin-allow.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "allow_front_back_communication" {
+  yaml_body  =  templatefile( "${var.config_path}/../authz/front-back.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "ratelimit_config" {
+  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/ratelimit-config.yaml", {})
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "ratelimit_envoy_filter" {
+  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/filter-ratelimit.yaml", {})
+  override_namespace = var.environment
+}
+
+resource "kubectl_manifest" "ratelimit_service" {
+  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/ratelimit-service.yaml", {})
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "ratelimit_svc_filter" {
+  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/filter-ratelimit-svc.yaml", {})
+  override_namespace = var.environment
+}
+
