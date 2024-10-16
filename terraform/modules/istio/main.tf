@@ -119,39 +119,39 @@ resource "kubernetes_secret" "flask_app_tls" {
   }
   type = "kubernetes.io/tls"
   data = {
-    "tls.crt" = file("${var.config_path}/flask-app.com.pem")
-    "tls.key" = file("${var.config_path}/flask-app.com-key.pem")
+    "tls.crt" = file("${path.module}/tls/flask-app.com.pem")
+    "tls.key" = file("${path.module}/tls/flask-app.com-key.pem")
   }
   depends_on = [helm_release.istio_ingress]
 }
 
 resource "kubectl_manifest" "istio_ingress_gateway" {
-  yaml_body  =  templatefile( "${var.config_path}/istio-ingress-gateway.yaml", { namespace = var.environment })
+  yaml_body  =  templatefile( "${path.module}/traffic/istio-ingress-gateway.yaml", { namespace = var.environment })
   depends_on = [kubernetes_secret.flask_app_tls]
 }
 
 resource "kubectl_manifest" "backend_round_robin" {
-  yaml_body  =  templatefile( "${var.config_path}/backend-destination.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/traffic/backend-destination.yaml", {})
   depends_on = [kubectl_manifest.istio_ingress_gateway]
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "mtls_policy" {
-  yaml_body  =  templatefile( "${var.config_path}/mtls-enable.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/tls/mtls-enable.yaml", {})
   depends_on = [kubectl_manifest.istio_ingress_gateway]
   override_namespace = var.environment
 }
 
 # Virtual service to control traffic between v1 and v2
 resource "kubectl_manifest" "frontend_backend_route" {
-  yaml_body  =  templatefile( "${var.config_path}/frontend-backend-route.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/traffic/frontend-backend-route.yaml", {})
   depends_on = [kubernetes_secret.flask_app_tls]
   override_namespace = var.injected_namespace
 }
 
 # Destination rule to label v1 and v2 subsets
 resource "kubectl_manifest" "split_traffic" {
-  yaml_body  =  templatefile( "${var.config_path}/split-traffic.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/traffic/split-traffic.yaml", {})
   depends_on = [kubernetes_secret.flask_app_tls]
   override_namespace = var.injected_namespace
 }
@@ -159,64 +159,64 @@ resource "kubectl_manifest" "split_traffic" {
 
 ## Disable TLS on backend metrics port
 resource "kubectl_manifest" "backend_peer_authentication" {
-  yaml_body  =  templatefile( "${var.config_path}/backend-peer-authentication.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/traffic/backend-peer-authentication.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "default_deny_policy" {
-  yaml_body  =  templatefile( "${var.config_path}/../authz/default-deny.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/authz/default-deny.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.environment
 }
 
 resource "kubectl_manifest" "allow_ingress" {
-  yaml_body  =  templatefile( "${var.config_path}/../authz/allow-ingress.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/authz/allow-ingress.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "allow_ingress_to_apps" {
-  yaml_body  =  templatefile( "${var.config_path}/../authz/allow-ingress-apps.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/authz/allow-ingress-apps.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.environment
 }
 
 resource "kubectl_manifest" "allow_traffic_to_backend" {
-  yaml_body  =  templatefile( "${var.config_path}/../authz/backend-allow.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/authz/backend-allow.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "allow_admin_full_access" {
-  yaml_body  =  templatefile( "${var.config_path}/../authz/admin-allow.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/authz/admin-allow.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "allow_front_back_communication" {
-  yaml_body  =  templatefile( "${var.config_path}/../authz/front-back.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/authz/front-back.yaml", {})
   depends_on = [kubectl_manifest.mtls_policy]
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "ratelimit_config" {
-  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/ratelimit-config.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/rate-limit/ratelimit-config.yaml", {})
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "ratelimit_envoy_filter" {
-  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/filter-ratelimit.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/rate-limit/filter-ratelimit.yaml", {})
   override_namespace = var.environment
 }
 
 resource "kubectl_manifest" "ratelimit_service" {
-  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/ratelimit-service.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/rate-limit/ratelimit-service.yaml", {})
   override_namespace = var.injected_namespace
 }
 
 resource "kubectl_manifest" "ratelimit_svc_filter" {
-  yaml_body  =  templatefile( "${var.config_path}/../rate-limit/filter-ratelimit-svc.yaml", {})
+  yaml_body  =  templatefile( "${path.module}/rate-limit/filter-ratelimit-svc.yaml", {})
   override_namespace = var.environment
 }
 
