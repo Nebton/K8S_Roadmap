@@ -5,7 +5,7 @@ metadata:
   name: app-config
   namespace: dev
 data:
-  DATABASE_URL: "postgresql://{{username}}:{{password}}@postgres-postgresql.prod.svc.cluster.local/postgres"
+  DATABASE_URL: "postgresql://{{username}}:{{password}}@postgres-postgresql.dev.svc.cluster.local/postgres"
   API_URL: "https://flask-app.com/api"
   LOG_LEVEL: "warn"
 

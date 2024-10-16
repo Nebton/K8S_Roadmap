@@ -2,7 +2,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: flask-app-monitor
-  namespace: monitoring
   annotations:
     sidecar.istio.io/inject: "true"
   labels:
