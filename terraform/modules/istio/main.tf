@@ -123,6 +123,8 @@ resource "kubernetes_secret" "flask_app_tls" {
     "tls.key" = file("${path.module}/tls/flask-app.com-key.pem")
   }
   depends_on = [helm_release.istio_ingress]
+
+
 }
 
 resource "kubectl_manifest" "istio_ingress_gateway" {
@@ -203,20 +205,24 @@ resource "kubectl_manifest" "allow_front_back_communication" {
 resource "kubectl_manifest" "ratelimit_config" {
   yaml_body  =  templatefile( "${path.module}/rate-limit/ratelimit-config.yaml", {})
   override_namespace = var.injected_namespace
+  depends_on = [helm_release.istiod]
 }
 
 resource "kubectl_manifest" "ratelimit_envoy_filter" {
   yaml_body  =  templatefile( "${path.module}/rate-limit/filter-ratelimit.yaml", {})
   override_namespace = var.environment
+  depends_on = [helm_release.istiod]
 }
 
 resource "kubectl_manifest" "ratelimit_service" {
   yaml_body  =  templatefile( "${path.module}/rate-limit/ratelimit-service.yaml", {})
   override_namespace = var.injected_namespace
+  depends_on = [helm_release.istiod]
 }
 
 resource "kubectl_manifest" "ratelimit_svc_filter" {
   yaml_body  =  templatefile( "${path.module}/rate-limit/filter-ratelimit-svc.yaml", {})
   override_namespace = var.environment
+  depends_on = [helm_release.istiod]
 }
 
