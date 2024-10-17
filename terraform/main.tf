@@ -77,7 +77,7 @@ module "postgres" {
   source      = "./modules/postgres"
   environment = var.environment 
   config_path = "${path.root}/../helm/postgres"
-  depends_on  = [module.istio]
+  depends_on  = [module.istio]  
 }
 
 # module "logging" {

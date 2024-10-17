@@ -208,21 +208,21 @@ resource "kubectl_manifest" "ratelimit_config" {
   depends_on = [helm_release.istiod]
 }
 
-resource "kubectl_manifest" "ratelimit_envoy_filter" {
-  yaml_body  =  templatefile( "${path.module}/rate-limit/filter-ratelimit.yaml", {})
-  override_namespace = var.environment
-  depends_on = [helm_release.istiod]
-}
-
 resource "kubectl_manifest" "ratelimit_service" {
   yaml_body  =  templatefile( "${path.module}/rate-limit/ratelimit-service.yaml", {})
   override_namespace = var.injected_namespace
-  depends_on = [helm_release.istiod]
+  depends_on = [kubectl_manifest.ratelimit_config]
+}
+
+resource "kubectl_manifest" "ratelimit_envoy_filter" {
+  yaml_body  =  templatefile( "${path.module}/rate-limit/filter-ratelimit.yaml", {})
+  override_namespace = var.environment
+  depends_on = [kubectl_manifest.ratelimit_service]
 }
 
 resource "kubectl_manifest" "ratelimit_svc_filter" {
   yaml_body  =  templatefile( "${path.module}/rate-limit/filter-ratelimit-svc.yaml", {})
   override_namespace = var.environment
-  depends_on = [helm_release.istiod]
+  depends_on = [kubectl_manifest.ratelimit_envoy_filter]
 }
 
