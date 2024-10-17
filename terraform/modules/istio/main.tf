@@ -202,6 +202,17 @@ resource "kubectl_manifest" "allow_front_back_communication" {
   override_namespace = var.injected_namespace
 }
 
+resource "kubectl_manifest" "allow_psql_connections" {
+  yaml_body  =  templatefile( "${path.module}/authz/postgres-allow.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+  override_namespace = var.injected_namespace
+}
+
+resource "kubectl_manifest" "allow_vault_queries" {
+  yaml_body  =  templatefile( "${path.module}/authz/vault-allow.yaml", {})
+  depends_on = [kubectl_manifest.mtls_policy]
+}
+
 # resource "kubectl_manifest" "ratelimit_config" {
 #   yaml_body  =  templatefile( "${path.module}/rate-limit/ratelimit-config.yaml", {})
 #   override_namespace = var.injected_namespace
