@@ -56,53 +56,53 @@ pipeline {
             }
         }       
 
-        //stage('Security Scan and SBOM Generation') {
-        //    steps {
-        //        script {
-        //            def scanAndGenerateSBOM = { imageName ->
-        //                def safeImageName = imageName.replaceAll('/', '_').replaceAll(':', '_')
-        //
-        //                // Vulnerability Scan (normal output to console)
-        //                sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName}"
-        //
-        //                // Vulnerability Scan (JSON for archiving, suppress stdout)
-        //                sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName} -f json > trivy_${safeImageName}.json"
-        //
-        //                // Generate SBOM (suppress stdout)
-        //                sh "trivy image  ${imageName} --format cyclonedx > sbom_${safeImageName}.json"
-        //            }
-        //
-        //            // Scan images
-        //            scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1")
-        //            scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2")
-        //            scanAndGenerateSBOM("$DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT")
-        //
-        //            // Archive Trivy results immediately
-        //            archiveArtifacts artifacts: 'trivy_*.json, sbom_*.json', allowEmptyArchive: true
-        //        }
-        //    }
-        //}
-        //
-        //stage('Checkov Scans') {
-        //    steps {
-        //        script {
-        //            // Determine environment
-        //            def environment = env.DEPLOY_ENV ?: 'default'
-        //
-        //            // Scan Helm charts (suppress stdout for file creation)
-        //            sh "checkov -d helm/k8s-roadmap --framework kubernetes --output-file-path checkov_${environment}/checkov-helm 1>/dev/null || true"
-        //
-        //            // Scan Kubernetes manifests (suppress stdout for file creation)
-        //            sh "checkov -d kubernetes/ --framework kubernetes --output-file-path checkov_${environment}/checkov-k8s 1>/dev/null || true"
-        //
-        //            // Scan Terraform code (suppress stdout for file creation)
-        //            sh "checkov -d terraform/ --framework terraform --output-file-path checkov_${environment}/checkov-tf 1>/dev/null || true"
-        //
-        //            // Archive Checkov results immediately
-        //            archiveArtifacts artifacts: "checkov_${environment}/*/results_cli.txt", allowEmptyArchive: true
-        //        }
-        //    }
-        //}
+       stage('Security Scan and SBOM Generation') {
+            steps {
+                script {
+                    def scanAndGenerateSBOM = { imageName ->
+                        def safeImageName = imageName.replaceAll('/', '_').replaceAll(':', '_')
+
+                        // Vulnerability Scan (normal output to console)
+                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName}"
+
+                        // Vulnerability Scan (JSON for archiving, suppress stdout)
+                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${imageName} -f json > trivy_${safeImageName}.json"
+
+                        // Generate SBOM (suppress stdout)
+                        sh "trivy image  ${imageName} --format cyclonedx > sbom_${safeImageName}.json"
+                    }
+
+                    // Scan images
+                    scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v1")
+                    scanAndGenerateSBOM("$DOCKER_IMAGE_BACKEND:backend-$GIT_COMMIT-v2")
+                    scanAndGenerateSBOM("$DOCKER_IMAGE_FRONTEND:frontend-$GIT_COMMIT")
+
+                    // Archive Trivy results immediately
+                    archiveArtifacts artifacts: 'trivy_*.json, sbom_*.json', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Checkov Scans') {
+            steps {
+                script {
+                    // Determine environment
+                    def environment = env.DEPLOY_ENV ?: 'default'
+
+                    // Scan Helm charts (suppress stdout for file creation)
+                    sh "checkov -d helm/k8s-roadmap --framework kubernetes --output-file-path checkov_${environment}/checkov-helm 1>/dev/null || true"
+
+                    // Scan Kubernetes manifests (suppress stdout for file creation)
+                    sh "checkov -d kubernetes/ --framework kubernetes --output-file-path checkov_${environment}/checkov-k8s 1>/dev/null || true"
+
+                    // Scan Terraform code (suppress stdout for file creation)
+                    sh "checkov -d terraform/ --framework terraform --output-file-path checkov_${environment}/checkov-tf 1>/dev/null || true"
+
+                    // Archive Checkov results immediately
+                    archiveArtifacts artifacts: "checkov_${environment}/*/results_cli.txt", allowEmptyArchive: true
+                }
+            }
+        }
 
         stage('Terraform Init') {
             steps {
