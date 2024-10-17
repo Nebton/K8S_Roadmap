@@ -1,4 +1,3 @@
-postgresqlDatabase: flask-app
 postgresqlUsername: postgres
 postgresqlPassword: P@55w0rd 
 

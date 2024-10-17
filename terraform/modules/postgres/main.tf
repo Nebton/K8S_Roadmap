@@ -46,7 +46,6 @@ resource "helm_release" "postgresql" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "postgresql"
   namespace  = var.environment 
-  values     = [file("${path.module}/postgres-values.yaml")]
   set {
     name  = "auth.postgresPassword"
     value = "P@55w0rd" 

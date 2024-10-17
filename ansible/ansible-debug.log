@@ -1,0 +1,735 @@
+2024-10-17 02:52:24,513 p=561284 u=doom n=ansible | [WARNING]: No inventory was parsed, only implicit localhost is available
+
+2024-10-17 02:52:24,517 p=561284 u=doom n=ansible | [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match
+'all'
+
+2024-10-17 02:52:24,696 p=561284 u=doom n=ansible |  __________________________________
+< PLAY [Setup and Configure Vault] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:24,732 p=561284 u=doom n=ansible |  _________________________
+< TASK [Initialize Vault] >
+ -------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:25,561 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:25,590 p=561284 u=doom n=ansible |  _______________________________
+< TASK [Save Vault init output] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:26,437 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:26,467 p=561284 u=doom n=ansible |  _____________________________
+< TASK [Load Vault init data] >
+ -----------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:26,492 p=561284 u=doom n=ansible | ok: [localhost]
+2024-10-17 02:52:26,520 p=561284 u=doom n=ansible |  _____________________
+< TASK [Unseal Vault] >
+ ---------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:27,111 p=561284 u=doom n=ansible | changed: [localhost] => (item=PhD7DJeiTDDDyeRVY44J+S7BSC83Ri1BepjtCWE2tT9c)
+2024-10-17 02:52:27,667 p=561284 u=doom n=ansible | changed: [localhost] => (item=tHN/pA93Z1UyQySmrONlNGEz1lEokMRftOKaRexatMbd)
+2024-10-17 02:52:28,301 p=561284 u=doom n=ansible | changed: [localhost] => (item=o6Zvhr2t9J6A4IX5RqFO2p+u/+dRHY1Y+2X3+BkYVeI/)
+2024-10-17 02:52:28,332 p=561284 u=doom n=ansible |  ______________________________
+< TASK [Setup port forwarding] >
+ ------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:28,771 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:28,804 p=561284 u=doom n=ansible |  ________________________________________
+< TASK [Wait for Vault to be accessible] >
+ ----------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:29,434 p=561284 u=doom n=ansible | ok: [localhost]
+2024-10-17 02:52:29,462 p=561284 u=doom n=ansible |  __________________________________________
+< TASK [Create vault-auth service account] >
+ ------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:29,902 p=561284 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: kubectl create serviceaccount vault-auth -n default
+  delta: '0:00:00.170740'
+  end: '2024-10-17 02:52:29.870183'
+  msg: non-zero return code
+  rc: 1
+  start: '2024-10-17 02:52:29.699443'
+  stderr: 'error: failed to create serviceaccount: serviceaccounts "vault-auth" already exists'
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:52:29,903 p=561284 u=doom n=ansible | ...ignoring
+2024-10-17 02:52:29,932 p=561284 u=doom n=ansible |  _______________________________________________________
+< TASK [Create vault-auth-binding cluster role binding] >
+ -------------------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:30,342 p=561284 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: |-
+    kubectl create clusterrolebinding -n default vault-auth-binding  --clusterrole=system:auth-delegator  --serviceaccount=default:vault-auth
+  delta: '0:00:00.138201'
+  end: '2024-10-17 02:52:30.311497'
+  msg: non-zero return code
+  rc: 1
+  start: '2024-10-17 02:52:30.173296'
+  stderr: 'error: failed to create clusterrolebinding: clusterrolebindings.rbac.authorization.k8s.io "vault-auth-binding" already exists'
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:52:30,342 p=561284 u=doom n=ansible | ...ignoring
+2024-10-17 02:52:30,371 p=561284 u=doom n=ansible |  ______________________________________
+< TASK [Enable Kubernetes auth method] >
+ --------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:31,359 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:31,390 p=561284 u=doom n=ansible |  __________________________________
+< TASK [Configure Kubernetes auth] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:32,224 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:32,261 p=561284 u=doom n=ansible |  __________________________________
+< TASK [Enable KV2 secrets engine] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:32,716 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:32,744 p=561284 u=doom n=ansible |  _______________________________
+< TASK [Create frontend secret] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:33,152 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:33,180 p=561284 u=doom n=ansible |  _______________________________
+< TASK [Create frontend policy] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:33,613 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:33,643 p=561284 u=doom n=ansible |  ____________________________________
+< TASK [Create Kubernetes auth role] >
+ ------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:34,063 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:34,092 p=561284 u=doom n=ansible |  _______________________________________
+< TASK [Enable database secrets engine] >
+ ---------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:34,526 p=561284 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:52:34,554 p=561284 u=doom n=ansible |  ___________________________________________________
+< TASK [Configure Vault with PostgreSQL connection] >
+ ---------------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:34,982 p=561284 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: |-
+    vault write database/config/postgresql  plugin_name=postgresql-database-plugin  connection_url="postgresql://{{username}}:{{password}}@postgres-postgresql.prod.svc.cluster.local/flaskdb?sslmode=disable"  allowed_roles=readonly  username="postgres"  password="P@55w0rd"
+  delta: '0:00:00.152095'
+  end: '2024-10-17 02:52:34.949331'
+  msg: non-zero return code
+  rc: 2
+  start: '2024-10-17 02:52:34.797236'
+  stderr: |-
+    Error writing data to database/config/postgresql: Error making API request.
+  
+    Namespace: vault/
+    URL: PUT http://127.0.0.1:8200/v1/database/config/postgresql
+    Code: 400. Errors:
+  
+    * error creating database object: error verifying connection: failed to connect to `host=postgres-postgresql.prod.svc.cluster.local user=postgres database=flaskdb`: failed to receive message (read tcp 10.244.0.188:49942->10.107.88.75:5432: read: connection reset by peer)
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:52:35,009 p=561284 u=doom n=ansible |  ____________
+< PLAY RECAP >
+ ------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:52:35,010 p=561284 u=doom n=ansible | localhost                  : ok=15   changed=13   unreachable=0    failed=1    skipped=0    rescued=0    ignored=2   
+2024-10-17 02:54:28,785 p=565041 u=doom n=ansible | [WARNING]: No inventory was parsed, only implicit localhost is available
+
+2024-10-17 02:54:28,789 p=565041 u=doom n=ansible | [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match
+'all'
+
+2024-10-17 02:54:28,948 p=565041 u=doom n=ansible |  __________________________________
+< PLAY [Setup and Configure Vault] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:54:28,984 p=565041 u=doom n=ansible |  _________________________
+< TASK [Initialize Vault] >
+ -------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:54:29,695 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:54:29,726 p=565041 u=doom n=ansible |  _______________________________
+< TASK [Save Vault init output] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:54:30,528 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:54:30,557 p=565041 u=doom n=ansible |  _____________________________
+< TASK [Load Vault init data] >
+ -----------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:54:30,581 p=565041 u=doom n=ansible | ok: [localhost]
+2024-10-17 02:54:30,609 p=565041 u=doom n=ansible |  _____________________
+< TASK [Unseal Vault] >
+ ---------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:54:31,221 p=565041 u=doom n=ansible | changed: [localhost] => (item=nKvQYsf4IXdtNdBT1aADcH16Rc2VHPg+XvdtGduqVxn+)
+2024-10-17 02:54:31,811 p=565041 u=doom n=ansible | changed: [localhost] => (item=0qIaBptoHAg75SE7T/cepjvOufPMC47ZvyYCV5RT9x/B)
+2024-10-17 02:54:32,469 p=565041 u=doom n=ansible | changed: [localhost] => (item=eEJ/ztnwU243gzeYCIJBKOr/Y8HZLADfzFMfLq8hyUbn)
+2024-10-17 02:54:32,517 p=565041 u=doom n=ansible |  ______________________________
+< TASK [Setup port forwarding] >
+ ------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:54:32,981 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:54:33,012 p=565041 u=doom n=ansible |  ________________________________________
+< TASK [Wait for Vault to be accessible] >
+ ----------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:06,391 p=565041 u=doom n=ansible | ok: [localhost]
+2024-10-17 02:55:06,421 p=565041 u=doom n=ansible |  __________________________________________
+< TASK [Create vault-auth service account] >
+ ------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:06,824 p=565041 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: kubectl create serviceaccount vault-auth -n default
+  delta: '0:00:00.134381'
+  end: '2024-10-17 02:55:06.792552'
+  msg: non-zero return code
+  rc: 1
+  start: '2024-10-17 02:55:06.658171'
+  stderr: 'error: failed to create serviceaccount: serviceaccounts "vault-auth" already exists'
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:55:06,825 p=565041 u=doom n=ansible | ...ignoring
+2024-10-17 02:55:06,852 p=565041 u=doom n=ansible |  _______________________________________________________
+< TASK [Create vault-auth-binding cluster role binding] >
+ -------------------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:07,501 p=565041 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: |-
+    kubectl create clusterrolebinding -n default vault-auth-binding  --clusterrole=system:auth-delegator  --serviceaccount=default:vault-auth
+  delta: '0:00:00.280371'
+  end: '2024-10-17 02:55:07.460291'
+  msg: non-zero return code
+  rc: 1
+  start: '2024-10-17 02:55:07.179920'
+  stderr: 'error: failed to create clusterrolebinding: clusterrolebindings.rbac.authorization.k8s.io "vault-auth-binding" already exists'
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:55:07,502 p=565041 u=doom n=ansible | ...ignoring
+2024-10-17 02:55:07,532 p=565041 u=doom n=ansible |  ______________________________________
+< TASK [Enable Kubernetes auth method] >
+ --------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:08,505 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:55:08,533 p=565041 u=doom n=ansible |  __________________________________
+< TASK [Configure Kubernetes auth] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:09,271 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:55:09,302 p=565041 u=doom n=ansible |  __________________________________
+< TASK [Enable KV2 secrets engine] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:09,907 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:55:09,935 p=565041 u=doom n=ansible |  _______________________________
+< TASK [Create frontend secret] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:10,446 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:55:10,479 p=565041 u=doom n=ansible |  _______________________________
+< TASK [Create frontend policy] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:10,886 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:55:10,915 p=565041 u=doom n=ansible |  ____________________________________
+< TASK [Create Kubernetes auth role] >
+ ------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:11,340 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:55:11,372 p=565041 u=doom n=ansible |  _______________________________________
+< TASK [Enable database secrets engine] >
+ ---------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:11,829 p=565041 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:55:11,858 p=565041 u=doom n=ansible |  ___________________________________________________
+< TASK [Configure Vault with PostgreSQL connection] >
+ ---------------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:12,280 p=565041 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: |-
+    vault write database/config/postgresql  plugin_name=postgresql-database-plugin  connection_url="postgresql://{{username}}:{{password}}@postgres-postgresql.prod.svc.cluster.local/flaskdb?sslmode=disable"  allowed_roles=readonly  username="postgres"  password="P@55w0rd"
+  delta: '0:00:00.125912'
+  end: '2024-10-17 02:55:12.245902'
+  msg: non-zero return code
+  rc: 2
+  start: '2024-10-17 02:55:12.119990'
+  stderr: |-
+    Error writing data to database/config/postgresql: Error making API request.
+  
+    Namespace: vault/
+    URL: PUT http://127.0.0.1:8200/v1/database/config/postgresql
+    Code: 400. Errors:
+  
+    * error creating database object: error verifying connection: failed to connect to `host=postgres-postgresql.prod.svc.cluster.local user=postgres database=flaskdb`: failed to receive message (read tcp 10.244.0.190:37450->10.107.88.75:5432: read: connection reset by peer)
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:55:12,313 p=565041 u=doom n=ansible |  ____________
+< PLAY RECAP >
+ ------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:55:12,314 p=565041 u=doom n=ansible | localhost                  : ok=15   changed=13   unreachable=0    failed=1    skipped=0    rescued=0    ignored=2   
+2024-10-17 02:56:49,940 p=569669 u=doom n=ansible | [WARNING]: No inventory was parsed, only implicit localhost is available
+
+2024-10-17 02:56:49,944 p=569669 u=doom n=ansible | [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match
+'all'
+
+2024-10-17 02:56:50,101 p=569669 u=doom n=ansible |  __________________________________
+< PLAY [Setup and Configure Vault] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:56:50,139 p=569669 u=doom n=ansible |  _________________________
+< TASK [Initialize Vault] >
+ -------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:56:50,842 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:56:50,872 p=569669 u=doom n=ansible |  _______________________________
+< TASK [Save Vault init output] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:56:51,660 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:56:51,696 p=569669 u=doom n=ansible |  _____________________________
+< TASK [Load Vault init data] >
+ -----------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:56:51,723 p=569669 u=doom n=ansible | ok: [localhost]
+2024-10-17 02:56:51,768 p=569669 u=doom n=ansible |  _____________________
+< TASK [Unseal Vault] >
+ ---------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:56:52,428 p=569669 u=doom n=ansible | changed: [localhost] => (item=GBuMM/wDqhsXBCGbL2R/tjiJdflpq6kJGjyFJ9i5Sp0C)
+2024-10-17 02:56:52,961 p=569669 u=doom n=ansible | changed: [localhost] => (item=mXRW+kRjCZCzQSPydi29SzD7FLEFnUuHlRVp4DKle+IY)
+2024-10-17 02:56:53,523 p=569669 u=doom n=ansible | changed: [localhost] => (item=aBZeZEB6K60cuPYs0hshwEB9TBdrj5avHIpjTe3FqozJ)
+2024-10-17 02:56:53,573 p=569669 u=doom n=ansible |  ______________________________
+< TASK [Setup port forwarding] >
+ ------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:56:54,030 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:56:54,068 p=569669 u=doom n=ansible |  ________________________________________
+< TASK [Wait for Vault to be accessible] >
+ ----------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:00,250 p=569669 u=doom n=ansible | ok: [localhost]
+2024-10-17 02:57:00,280 p=569669 u=doom n=ansible |  __________________________________________
+< TASK [Create vault-auth service account] >
+ ------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:00,688 p=569669 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: kubectl create serviceaccount vault-auth -n default
+  delta: '0:00:00.133309'
+  end: '2024-10-17 02:57:00.656683'
+  msg: non-zero return code
+  rc: 1
+  start: '2024-10-17 02:57:00.523374'
+  stderr: 'error: failed to create serviceaccount: serviceaccounts "vault-auth" already exists'
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:57:00,688 p=569669 u=doom n=ansible | ...ignoring
+2024-10-17 02:57:00,716 p=569669 u=doom n=ansible |  _______________________________________________________
+< TASK [Create vault-auth-binding cluster role binding] >
+ -------------------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:01,132 p=569669 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: |-
+    kubectl create clusterrolebinding -n default vault-auth-binding  --clusterrole=system:auth-delegator  --serviceaccount=default:vault-auth
+  delta: '0:00:00.139970'
+  end: '2024-10-17 02:57:01.098167'
+  msg: non-zero return code
+  rc: 1
+  start: '2024-10-17 02:57:00.958197'
+  stderr: 'error: failed to create clusterrolebinding: clusterrolebindings.rbac.authorization.k8s.io "vault-auth-binding" already exists'
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:57:01,132 p=569669 u=doom n=ansible | ...ignoring
+2024-10-17 02:57:01,159 p=569669 u=doom n=ansible |  ______________________________________
+< TASK [Enable Kubernetes auth method] >
+ --------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:01,912 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:57:01,941 p=569669 u=doom n=ansible |  __________________________________
+< TASK [Configure Kubernetes auth] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:02,695 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:57:02,725 p=569669 u=doom n=ansible |  __________________________________
+< TASK [Enable KV2 secrets engine] >
+ ----------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:03,144 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:57:03,172 p=569669 u=doom n=ansible |  _______________________________
+< TASK [Create frontend secret] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:03,608 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:57:03,637 p=569669 u=doom n=ansible |  _______________________________
+< TASK [Create frontend policy] >
+ -------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:04,078 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:57:04,109 p=569669 u=doom n=ansible |  ____________________________________
+< TASK [Create Kubernetes auth role] >
+ ------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:04,555 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:57:04,584 p=569669 u=doom n=ansible |  _______________________________________
+< TASK [Enable database secrets engine] >
+ ---------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:04,996 p=569669 u=doom n=ansible | changed: [localhost]
+2024-10-17 02:57:05,028 p=569669 u=doom n=ansible |  ___________________________________________________
+< TASK [Configure Vault with PostgreSQL connection] >
+ ---------------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:05,460 p=569669 u=doom n=ansible | fatal: [localhost]: FAILED! => changed=true 
+  cmd: |-
+    vault write database/config/postgresql  plugin_name=postgresql-database-plugin  connection_url="postgresql://{{username}}:{{password}}@postgres-postgresql.prod.svc.cluster.local/flaskdb?sslmode=disable"  allowed_roles=readonly  username="postgres"  password="P@55w0rd"
+  delta: '0:00:00.137197'
+  end: '2024-10-17 02:57:05.426561'
+  msg: non-zero return code
+  rc: 2
+  start: '2024-10-17 02:57:05.289364'
+  stderr: |-
+    Error writing data to database/config/postgresql: Error making API request.
+  
+    Namespace: vault/
+    URL: PUT http://127.0.0.1:8200/v1/database/config/postgresql
+    Code: 400. Errors:
+  
+    * error creating database object: error verifying connection: failed to connect to `host=postgres-postgresql.prod.svc.cluster.local user=postgres database=flaskdb`: failed to receive message (unexpected EOF)
+  stderr_lines: <omitted>
+  stdout: ''
+  stdout_lines: <omitted>
+2024-10-17 02:57:05,487 p=569669 u=doom n=ansible |  ____________
+< PLAY RECAP >
+ ------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+2024-10-17 02:57:05,487 p=569669 u=doom n=ansible | localhost                  : ok=15   changed=13   unreachable=0    failed=1    skipped=0    rescued=0    ignored=2   
