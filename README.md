@@ -1,10 +1,10 @@
-# DevSecOps Learning Journey
+# 𒌐 DevSecOps Learning Journey 𒌐 
 
-As a freshly graduated cybersecurity engineer and a DevSecOps intern, I embarked on a journey to deepen my knowledge of DevOps technologies and tools. Following advice from Claude, I explored Kubernetes and many other tools over the course of a month and a half. This project reflects my progress, the technologies I used, and the DevSecOps practices I learned along the way.
+As a freshly graduated cybersecurity engineer and a DevSecOps intern, I wanted to get better. So I embarked on a journey to learn about DevOps technologies and tools. Following advice from Claude, I explored Kubernetes and many other awesome tools over the course of a month and a half. This project reflects my progress, the technologies I used, and the DevSecOps practices I learned along the way.
 
 ---
 
-## 🚀 Technologies Used
+## 𒌐 Technologies Used 𒌐 
 
 - **Containerization & Orchestration:** Docker, Minikube, Kubernetes  
 - **Infrastructure as Code (IaC):** Terraform, Helm, Ansible 
@@ -17,13 +17,13 @@ As a freshly graduated cybersecurity engineer and a DevSecOps intern, I embarked
 
 ---
 
-## 📑 DevSecOps Practices Learned
+## 𒌐 DevSecOps Practices Learned 𒌐 
 
-- Containerization and microservices deployment  
+- Containerization and microservices deployment
 - Automating infrastructure with IaC tools (Terraform, Helm)  
-- CI/CD pipeline setup and deployment automation  
+- CI/CD pipeline setup and deployment automation
 - Multi-environment management (dev, staging, prod)  
-- Monitoring and observability practices with Prometheus, Grafana, and ELK  
+- Monitoring and observability practices with Prometheus, Grafana, and ELK Stack 
 - Service mesh implementation with Istio  
 - Traffic routing using Istio Ingress Gateway  
 - TLS termination at Istio Ingress and mutual TLS encryption  
@@ -31,16 +31,16 @@ As a freshly graduated cybersecurity engineer and a DevSecOps intern, I embarked
 - Caching strategies using Redis  
 - Retry and timeout improvements with Istio  
 - Canary and blue/green deployments for safe releases  
-- A/B testing using user subsets, cookies, or geo-IP  
+- A/B testing using user subsets, cookies, or geo-IP  using Istio's VirtualService feature
 - Horizontal pod autoscaling for performance optimization  
 - Resiliency patterns: circuit breaker and fault injection  
-- Secrets management using HashiCorp Vault  
-- Security and compliance: network policies, RBAC, security scanning (Trivy, Checkov)  
-- GitOps workflows for streamlined deployments  
+- Secrets management using HashiCorp Vault (KV2 Engine, Dynamic Database Secrets, Transit Engine)
+- Security and compliance: network policies, RBAC, security scanning, SBOM Generation (Trivy, Checkov)  
+- GitOps workflows for streamlined deployments
 
 ---
 
-## 📋 Learning Roadmap
+## 📋 Learning Roadmap 
 
 ### **Level 1: Basic Setup**
 1. Create a simple microservices application (e.g., a basic web app with a backend API)  
@@ -91,7 +91,7 @@ As a freshly graduated cybersecurity engineer and a DevSecOps intern, I embarked
 
 ---
 
-## 🎯 Conclusion
+## 𒌐 Conclusion 𒌐 
 
 This project has been an incredible learning experience that exposed me to a variety of tools and practices in the DevSecOps ecosystem. Following the roadmap allowed me to gradually build my knowledge, automate processes, and enhance the security and scalability of my systems.  
 
