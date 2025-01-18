@@ -3,18 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frontend Display</title>
+    <title>DevSecOps Control Center</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <!-- Dashboard Component -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </head>
 <body>
-    <h1>Welcome to the Frontend Application!</h1>
-    <p>{{ message }}</p>
-
-    <h2>Backend Information</h2>
-    <ul>
-        <li><strong>Secret :</strong> {{ secret }}</li>
-        <li><strong>Database URL:</strong> {{ database_url }}</li>
-        <li><strong>API URL:</strong> {{ api_url }}</li>
-        <li><strong>Log Level:</strong> {{ log_level }}</li>
-    </ul>
+    <div id="root"></div>
+    <script>
+        // Initialize the data from Flask template variables
+        const data = {
+            message: "{{ message }}",
+            secret: "{{ secret }}",
+            database_url: "{{ database_url }}",
+            api_url: "{{ api_url }}",
+            log_level: "{{ log_level }}"
+        };
+        
+        // Render the dashboard
+        ReactDOM.render(
+            React.createElement(CyberpunkDashboard, data),
+            document.getElementById('root')
+        );
+    </script>
 </body>
 </html>

@@ -5,7 +5,6 @@ from prometheus_client.exposition import CONTENT_TYPE_LATEST
 from multiprocessing import Process
 
 # Fetch environment variables
-database_url = os.getenv('DATABASE_URL')
 api_url = os.getenv('API_URL')
 log_level = os.getenv('LOG_LEVEL')
 
