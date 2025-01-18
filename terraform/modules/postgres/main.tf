@@ -43,7 +43,7 @@ resource "kubernetes_config_map" "postgres_init_scripts" {
 
 resource "helm_release" "postgresql" {
   name       = "postgres"
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "bitnami"
   chart      = "postgresql"
   namespace  = var.environment 
   values     = [file("${path.module}/postgres-values.yaml")]
