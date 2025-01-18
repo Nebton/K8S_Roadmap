@@ -1,0 +1,71 @@
+graph TD
+    %% Developer Tools Layer
+    Dev[Developer] -->|Git Push| GH[GitHub]
+    Dev -->|Local Development| Docker[Docker Desktop]
+    
+    %% CI/CD Pipeline
+    subgraph CICD["Continuous Integration/Delivery"]
+        GH -->|Webhook| Jenkins[Jenkins Pipeline]
+        Jenkins -->|Build Container| Docker
+        Jenkins -->|Scan Container| Trivy[Trivy Scanner]
+        Jenkins -->|Scan IaC| Checkov[Checkov]
+        Docker -->|Push Image| Registry[Container Registry]
+        Jenkins -->|Deploy Charts| Helm[Helm]
+    end
+    
+    %% Infrastructure Provisioning
+    subgraph IaC["Infrastructure Management"]
+        Terraform -->|Provision| K8S[Kubernetes Cluster]
+        Ansible -->|Configure| K8S
+        Helm -->|Deploy Apps| K8S
+    end
+    
+    %% Kubernetes Ecosystem
+    subgraph K8sEnv["Kubernetes Environment"]
+        %% Service Mesh Components
+        subgraph Mesh["Istio Service Mesh"]
+            Gateway[Istio Gateway] -->|Ingress Traffic| VS[Virtual Services]
+            VS -->|Route| Apps[Microservices]
+            VS -->|Load Balance| Apps
+            Apps -->|Cache| Redis
+            Apps <-->|mTLS| Apps
+        end
+        
+        %% Security Components
+        subgraph Security["Security Controls"]
+            NP[Network Policies] -->|Restrict| Apps
+            RBAC[RBAC] -->|Authorize| Apps
+            Vault[HashiCorp Vault] -->|Inject Secrets| Apps
+            Vault -->|DB Credentials| DB[(Databases)]
+        end
+        
+        %% Observability Stack
+        subgraph Observability["Monitoring Stack"]
+            Apps -->|Metrics| Prometheus
+            Apps -->|Logs| Elastic[Elasticsearch]
+            Prometheus -->|Visualize| Grafana
+            Elastic -->|Visualize| Kibana
+            Grafana -->|Alerts| Alert[Alert Manager]
+        end
+        
+        %% Database Layer
+        subgraph DataLayer["Data Services"]
+            Apps -->|Query| DB
+            DB -->|Cache| Redis
+        end
+    end
+    
+    %% External Connections
+    Registry -->|Pull Images| K8S
+    Internet((Internet)) -->|Traffic| Gateway
+    
+    %% Styling
+    classDef primary fill:#2374AB,stroke:#2374AB,stroke-width:2px,color:#fff
+    classDef secondary fill:#047FCA,stroke:#047FCA,stroke-width:2px,color:#fff
+    classDef highlight fill:#1B4965,stroke:#1B4965,stroke-width:2px,color:#fff
+    classDef critical fill:#FF6B6B,stroke:#FF6B6B,stroke-width:2px,color:#fff
+    
+    class Dev,GH primary
+    class Jenkins,Docker,Registry,Terraform,Helm,Ansible secondary
+    class Gateway,VS,Apps,Prometheus,Elastic,Vault highlight
+    class Alert,NP,RBAC critical
