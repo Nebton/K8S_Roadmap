@@ -18,7 +18,6 @@ metrics_app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Environment variables
-database_url = os.getenv('DATABASE_URL')
 api_url = os.getenv('API_URL')
 log_level = os.getenv('LOG_LEVEL')
 
@@ -33,14 +32,14 @@ CACHE_MISSES = Counter('cache_misses_total', 'Total number of cache misses')
 def get_db_connection():
     client = hvac.Client(url="http://vault.vault.svc.cluster.local:8200")
 
-    with open("/var/run/secrets/kubernetes.io/serviceaccount/token",'r') as f :
+    with open("/var/run/secrets/kubernetes.io/serviceaccount/token",'r') as f:
         jwt = f.read()
-    try : 
+    try:
         Kubernetes(client.adapter).login(role="backend",jwt=jwt)
-    except Exception as e: 
-        print(f"Exception {e} occured for token {jwt}")
+    except Exception as e:
+        print(f"Exception {e} occurred for token {jwt}")
  
-# Request dynamic credentials for the database
+    # Request dynamic credentials for the database
     response = client.secrets.database.generate_credentials(name="readonly")
     
     # Extract the credentials
@@ -56,6 +55,224 @@ def get_db_connection():
     )
     
     return conn
+
+@app.route('/api/docs')
+def get_api_docs():
+    # Get current database connection info dynamically
+    conn = get_db_connection()
+    db_params = conn.get_dsn_parameters()
+    conn.close()
+    
+    swagger_doc = {
+        "openapi": "3.0.0",
+        "info": {
+            "title": "Enhanced Backend API",
+            "description": "API documentation for the Flask backend service with metrics, caching, and database integration",
+            "version": "2.0.0"
+        },
+        "servers": [
+            {
+                "url": "http://localhost:5000",
+                "description": "Local development server"
+            }
+        ],
+        "paths": {
+            "/api/hello": {
+                "get": {
+                    "summary": "Get personalized greeting",
+                    "description": "Returns a personalized greeting with backend configuration details",
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "in": "query",
+                            "description": "Name to personalize greeting",
+                            "required": False,
+                            "schema": {
+                                "type": "string",
+                                "default": "World"
+                            }
+                        },
+                        {
+                            "name": "delay",
+                            "in": "query",
+                            "description": "Artificial delay in seconds for timeout testing",
+                            "required": False,
+                            "schema": {
+                                "type": "integer",
+                                "default": 0
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Successful response",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message": {"type": "string"},
+                                            "database_url": {"type": "string"},
+                                            "api_url": {"type": "string"},
+                                            "log_level": {"type": "string"},
+                                            "version": {"type": "string"},
+                                            "features": {
+                                                "type": "array",
+                                                "items": {"type": "string"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/users": {
+                "get": {
+                    "summary": "Get all users",
+                    "description": "Retrieves all users from the database using dynamic vault credentials",
+                    "responses": {
+                        "200": {
+                            "description": "List of users",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {"type": "integer"},
+                                                "username": {"type": "string"},
+                                                "email": {"type": "string"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/data": {
+                "get": {
+                    "summary": "Get random data items",
+                    "description": "Returns an array of items with random values",
+                    "responses": {
+                        "200": {
+                            "description": "List of random items",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {"type": "integer"},
+                                                "name": {"type": "string"},
+                                                "value": {"type": "integer"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/status": {
+                "get": {
+                    "summary": "Get service status",
+                    "description": "Returns the current status of the service",
+                    "responses": {
+                        "200": {
+                            "description": "Service status information",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "status": {"type": "string"},
+                                            "version": {"type": "string"},
+                                            "cache_status": {"type": "string"},
+                                            "database_connection": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/error": {
+                "get": {
+                    "summary": "Test error handling",
+                    "description": "Endpoint that randomly succeeds or fails for testing retry logic",
+                    "responses": {
+                        "200": {
+                            "description": "Successful response",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {
+                            "description": "Internal server error",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/metrics": {
+                "get": {
+                    "summary": "Get service metrics",
+                    "description": "Returns Prometheus metrics for monitoring",
+                    "responses": {
+                        "200": {
+                            "description": "Prometheus metrics",
+                            "content": {
+                                "text/plain": {
+                                    "schema": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "components": {
+            "schemas": {
+                "DatabaseInfo": {
+                    "type": "object",
+                    "properties": {
+                        "host": {"type": "string", "example": "postgres-postgresql"},
+                        "database": {"type": "string", "example": "flaskdb"},
+                        "user": {"type": "string", "description": "Dynamic username from Vault"},
+                        "port": {"type": "integer", "example": 5432}
+                    }
+                }
+            }
+        }
+    }
+    
+    return jsonify(swagger_doc)
 
 @app.route('/users')
 def get_users():
@@ -81,9 +298,14 @@ def hello():
     # New feature: personalized greeting
     name = request.args.get('name', 'World')
     
+    # Get database connection info
+    conn = get_db_connection()
+    db_params = conn.get_dsn_parameters()
+    conn.close()
+    
     response = {
         "message": f"Hello, {name}, from the enhanced backend v2!",
-        "database_url": database_url,
+        "database_url": f"postgresql://{db_params['host']}:{db_params['port']}/{db_params['dbname']}",
         "api_url": api_url,
         "log_level": log_level,
         "version": "v2",

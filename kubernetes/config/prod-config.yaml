@@ -6,5 +6,5 @@ metadata:
   namespace: prod
 data:
   DATABASE_URL: "postgresql://{{username}}:{{password}}@postgres-postgresql.prod.svc.cluster.local/postgres"
-  API_URL: "https://flask-app.com/api"
+  API_URL: "https://flask-app.com/api/docs"
   LOG_LEVEL: "warn"
