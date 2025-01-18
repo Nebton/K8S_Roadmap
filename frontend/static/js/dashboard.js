@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Terminal, Server, Shield, Database, Activity, Cloud, Box, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
-const CyberpunkDashboard = ({ message, secret, database_url, api_url, log_level }) => {
+export const CyberpunkDashboard = ({ message, secret, database_url, api_url, log_level }) => {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
@@ -160,5 +160,3 @@ const CyberpunkDashboard = ({ message, secret, database_url, api_url, log_level 
     </div>
   );
 };
-
-export default CyberpunkDashboard;
